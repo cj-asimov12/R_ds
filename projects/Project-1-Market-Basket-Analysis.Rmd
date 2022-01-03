@@ -1,0 +1,251 @@
+---
+title: "R : Project 1 : Market-Basket-Analysis"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+library(arules)
+library(arulesViz)
+library(plotly)
+library(RColorBrewer)
+```
+
+### Exploring the data
+
+```{r}
+# Loading the data-set
+retail <- read.csv("/home/carb0n/Desktop/r/d/p1/market_basket.csv")
+
+# Loading the data-set
+tr <- read.transactions("/home/carb0n/Desktop/r/d/p1/market_basket.csv", format="basket", sep=",")
+
+# Checking summary of the data-set
+summary(tr)
+```
+
+### Summary Related Answers:
+
+##### Total number of transactions => 18841 
+##### Total number of items in the inventory => 26230
+##### Total number of items purchased =>
+
+```{r}
+18441*26230*0.0007227055  
+```
+
+##### Plot for identifying 10 most frequently bought items
+
+```{r}
+itemFrequencyPlot(tr, topN=10, type="absolute", col=brewer.pal(8,'Pastel2'),
+                  main="Absolute Item Frequency Plot")
+```
+
+### (A) 1st Set of Association Rules
+
+#### Creation of 1st Set of Association Rules
+
+```{r}
+# Using min support as 0.005 and confidence as 0.8.
+association.rules_1 <- apriori(tr, parameter = list(supp=0.005, conf=0.8,maxlen=10))
+
+# Checking summary of association rule-1
+summary(association.rules_1)
+```
+
+#### Inspection of 1st Set Of Association Rules
+
+```{r}
+# Inspection of top 5 rules sorted w.r.t. confidence  
+inspect(head(sort(association.rules_1,by='confidence'),5))
+
+# Inspection of bottom 5 rules sorted w.r.t. confidence
+inspect(tail(sort(association.rules_1,by='confidence'),5))
+
+# Inspection of top 5 rules sorted w.r.t. lift
+inspect(head(sort(association.rules_1,by='lift'),5))
+```
+
+#### Plotting 1st Set of Association Rules
+
+```{r}
+# Plotting all the rules
+plot(association.rules_1, method='scatter', engine='html')
+```
+
+#### Rules with confidence greater than 0.4 or 40% (from 1st set)
+
+```{r}
+# Filter rules with confidence greater than 0.4 or 40%
+subRules_ar1 <- association.rules_1[quality(association.rules_1)$confidence>0.4]
+
+# Interactive scatter plot for subRules_ar1 using plotly engine
+plot(subRules_ar1, method="scatter", engine="plotly")
+
+# Two-key plot for subRules_ar1
+plot(subRules_ar1, method="two-key plot")
+```
+
+#### Top-10 rules with highest "confidence" (from 1st set)
+
+```{r}
+# Filter top10 rules with highest confidence
+subRules_ar1 <- head(subRules_ar1, n=10, by='confidence')
+
+# Interactive plot for subRules_ar1 using html engine
+plot(subRules_ar1, method="graph", engine="htmlwidget")
+```
+
+#### Top-10 rules with highest "lift" (from 1st set)
+
+```{r}
+# Filter top10 rules with highest lift
+subRules_ar1 <- head(subRules_ar1, n=10, by='lift')
+
+# Plot for subRules_ar1
+plot(subRules_ar1, method="paracoord", main='Top10 rules with highest lift')
+```
+
+### (B) 2nd Set of Association Rules
+
+#### Creation of 2nd Set of Association Rules 
+
+```{r}
+# Using min support as 0.009 and confidence as 0.3.
+association.rules_2 <- apriori(tr, parameter = list(supp=0.009, conf=0.3,maxlen=10))
+
+# Checking summary of association rules-2
+summary(association.rules_2)
+```
+
+#### Inspection of 2nd Set of Association Rules
+
+```{r}
+# Inspection of top 5 rules sorted w.r.t. confidence  
+inspect(head(sort(association.rules_2,by='confidence'),5))
+
+# Inspection of bottom 5 rules sorted w.r.t. confidence
+inspect(tail(sort(association.rules_2,by='confidence'),5))
+
+# Inspection of top 5 rules sorted w.r.t. lift
+inspect(head(sort(association.rules_2,by='lift'),5))
+```
+
+#### Plotting 2nd Set of Association Rules
+
+```{r}
+# Plotting all the rules
+plot(association.rules_2, method='scatter', engine='html')
+```
+
+#### Rules with confidence greater than 0.4 or 40% (from 2nd set)
+
+```{r}
+# Filter rules with confidence greater than 0.4 or 40%
+subRules_ar2 <- association.rules_2[quality(association.rules_2)$confidence>0.4]
+
+# Interactive scatter plot for subRules_ar1 using plotly engine
+plot(subRules_ar2, method="scatter", engine="plotly")
+
+# Two-key plot for subRules_ar1
+plot(subRules_ar2, method="two-key plot")
+```
+
+#### Top-10 rules with highest "confidence" (from 2nd set)
+
+```{r}
+# Filter top10 rules with highest confidence
+subRules_ar2 <- head(subRules_ar2, n=10, by='confidence')
+
+# Interactive plot for subRules_ar1 using html engine
+plot(subRules_ar2, method="graph", engine="htmlwidget")
+```
+
+#### Top-10 rules with highest "lift" (from 2nd set)
+
+```{r}
+# Filter top10 rules with highest lift
+subRules_ar2 <- head(subRules_ar2, n=10, by='lift')
+
+# Plot for subRules_ar1
+plot(subRules_ar2, method="paracoord", main='Top10 rules with highest lift')
+```
+
+### (C) 3rd Set of Association Rules
+
+#### Creation of 3rd Set of Association Rules
+
+```{r}
+# Using min support as 0.002 and confidence as 0.5.
+association.rules_3 <- apriori(tr, parameter = list(supp=0.02, conf=0.5,maxlen=10))
+
+# Checking summary of association rules-3
+summary(association.rules_3)
+```
+
+#### Inspection of 3rd Set of Association Rules
+```{r}
+# Inspection of top 5 rules sorted w.r.t. confidence  
+inspect(head(sort(association.rules_3,by='confidence'),5))
+
+# Inspection of bottom 5 rules sorted w.r.t. confidence
+inspect(tail(sort(association.rules_3,by='confidence'),5))
+
+# Inspection of top 5 rules sorted w.r.t. lift
+inspect(head(sort(association.rules_3,by='lift'),5))
+```
+
+#### Plotting 3rd Set of Association Rules
+
+```{r}
+# Plotting all the rules
+plot(association.rules_3, method='scatter', engine='html')
+```
+
+#### Rules with confidence greater than 0.4 or 40% (from 3rd set)
+
+```{r}
+# Filter rules with confidence greater than 0.4 or 40%
+subRules_ar3 <- association.rules_3[quality(association.rules_3)$confidence>0.4]
+
+# Interactive scatter plot for subRules_ar1 using plotly engine
+plot(subRules_ar3, method="scatter", engine="plotly")
+
+# Two-key plot for subRules_ar1
+plot(subRules_ar3, method="two-key plot")
+```
+
+#### Top-10 rules with highest "confidence" (from 3rd set)
+
+```{r}
+# Filter top10 rules with highest confidence
+subRules_ar3 <- head(subRules_ar3, n=10, by='confidence')
+
+# Interactive plot for subRules_ar1 using html engine
+plot(subRules_ar3, method="graph", engine="htmlwidget")
+```
+
+#### Top-10 rules with highest "lift" (from 3rd set)
+
+```{r}
+# Filter top10 rules with highest lift
+subRules_ar3 <- head(subRules_ar3, n=10, by='lift')
+
+# Plot for subRules_ar1
+plot(subRules_ar3, method="paracoord", main='Top10 rules with highest lift')
+```

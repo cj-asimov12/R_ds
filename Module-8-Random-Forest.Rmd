@@ -1,0 +1,471 @@
+---
+title: "R : Module 8 : Random Forest"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 8 : Assignment 1-8
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('randomForest')
+```
+
+### (A) City-Temperature Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+city_1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Taking Sample of 2500 records from original data-set
+city_1 <- city_1[sample(nrow(city_1), size = 2500, replace = TRUE),] 
+
+# Checking row-size
+nrow(city_1)
+
+# Checking for NA values
+sum(is.na(city_1))
+
+# Removing "State" column as it is not needed
+city_1 <- within(city_1, rm(State))
+
+# Checking structure of data-set
+str(city_1)
+
+# Checking unique values in Year column
+unique(city_1$Year)
+
+# Replacing unique values "201" and "200" from Year column to "2001" and "2000" respectively 
+for(i in 1:nrow(city_1)){
+  if(city_1$Year[i]==200){
+    city_1$Year[i]=2000
+  }
+  else if(city_1$Year[i]==201){
+    city_1$Year[i]=2001
+  }
+}
+
+# Converting appropriate variables to factor-type 
+as.factor(city_1$Region) -> city_1$Region
+as.factor(city_1$Country) -> city_1$Country
+as.factor(city_1$City) -> city_1$City
+as.factor(city_1$Year) -> city_1$Year
+```
+
+#### Splitting the data-set into 70:30 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(city_1$Region, SplitRatio=0.70) -> city_1_split_tag
+subset(city_1, city_1_split_tag==T) -> city_1_train
+subset(city_1, city_1_split_tag==F) -> city_1_test
+```
+
+#### Random-Forest Model with one independent variable
+
+```{r}
+city_rf1 <- randomForest(Region ~ AvgTemperature, data = city_1_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(city_rf1)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(city_rf1)
+```
+
+#### Predicting on test-data
+
+```{r}
+city_rf1_pred <- predict(city_rf1, newdata = city_1_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(city_rf1_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(city_1_test$Region, city_rf1_pred)
+```
+
+#### Random-Forest Model with multiple independent variables
+
+```{r}
+# Building Model
+city_rf2 <- randomForest(Region ~ AvgTemperature +Day +Month +Year, data = city_1_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(city_rf2)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(city_rf2)
+```
+
+#### Predicting on test-data
+
+```{r}
+city_rf2_pred <- predict(city_rf2, newdata = city_1_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(city_rf2_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(city_1_test$Region, city_rf2_pred)
+```
+
+### (B) Customer-Churn Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Random-Forest Model with one independent variable
+
+```{r}
+# Building Model
+churn_rf1 <- randomForest(Churn ~ MonthlyCharges, data = churn_4_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(churn_rf1)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(churn_rf1)
+```
+
+#### Predicting on test-data
+
+```{r}
+churn_rf1_pred <- predict(churn_rf1, newdata = churn_4_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(churn_rf1_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$Churn, churn_rf1_pred)
+```
+
+#### Random-Forest Model with multiple independent variables
+
+```{r}
+# Building Model
+churn_rf2 <- randomForest(Churn ~ MonthlyCharges +TotalCharges +StreamingTV +tenure, data = churn_4_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(churn_rf2)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(churn_rf2)
+```
+
+#### Predicting on test-data
+
+```{r}
+churn_rf2_pred <- predict(churn_rf2, newdata = churn_4_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(churn_rf2_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$Churn, churn_rf2_pred)
+```
+
+### (C) Pharmacovigilance Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+pharma_3 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Removing LocationID column as it is not needed
+pharma_3 <- within(pharma_3, rm(LocationID))
+
+# Checking for NA values
+colSums(is.na(pharma_3))
+
+# Checking structure of the data-set
+str(pharma_3)
+
+# Converting appropriate variables to factor-type
+as.factor(pharma_3$Issues) -> pharma_3$Issues
+as.factor(pharma_3$DrugID) -> pharma_3$DrugID
+as.factor(pharma_3$Gender) -> pharma_3$Gender
+```
+
+#### Splitting the data-set into 75:25 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(pharma_3$DrugID, SplitRatio=0.75) -> pharma_3_split_tag
+subset(pharma_3, pharma_3_split_tag==T) -> pharma_3_train
+subset(pharma_3, pharma_3_split_tag==F) -> pharma_3_test
+```
+
+#### Random-Forest Model with one independent variable
+
+```{r}
+# Building Model
+pharma_rf1 <- randomForest(DrugID ~ Age, data = pharma_3_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(pharma_rf1)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(pharma_rf1)
+```
+
+#### Predicting on test-data
+
+```{r}
+pharma_rf1_pred <- predict(pharma_rf1, newdata = pharma_3_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(pharma_rf1_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(pharma_3_test$DrugID, pharma_rf1_pred)
+```
+
+#### Random-Forest Model with multiple independent variables
+
+```{r}
+# Building Model
+pharma_rf2 <- randomForest(DrugID ~ Age +PatientID +Gender, data = pharma_3_train)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(pharma_rf2)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(pharma_rf2)
+```
+
+#### Predicting on test-data
+
+```{r}
+pharma_rf2_pred <- predict(pharma_rf2, newdata = pharma_3_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(pharma_rf2_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(pharma_3_test$DrugID, pharma_rf2_pred)
+```
+
+### Module 8: Case-Study 1
+
+#### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('randomForest')
+```
+
+#### Task-1 : Building the first "Random Forest" model
+
+```{r}
+#a. Start off by dividing the 'customer_churn' data into train & test sets in 65:35 ratios. The split-criteria would be determined by the 'gender' column
+#b. Build a random forest model on top of the 'train' set, where the dependent variable is 'gender' & the independent variables are 'MonthlyCharges' &   'tenure'. The number of decision trees in the random forest would be 35. Store the result in 'mod_forest2'
+#c. Find the importance of the independent variables and also plot it
+#d. Predict the values on top of the test set & store the result in 'result_forest2'
+#e. Build a confusion matrix for the actual values & the predicted values
+#f. Find out the accuracy from the confusion matrix
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Building Random-Forest Model
+
+```{r}
+# Building Model
+mod_forest1 <- randomForest(gender ~ MonthlyCharges +tenure, data = churn_4_train,    
+                            ntree = 35)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(mod_forest1)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(mod_forest1)
+```
+
+#### Predicting on test-data
+
+```{r}
+mod_forest1_pred <- predict(mod_forest1, newdata = churn_4_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(mod_forest1_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$gender, mod_forest1_pred)
+```
+
+#### Taske-2 : Build a 2nd 'Random forest' model on the same train & test sets
+
+```{r}
+#a. The dependent & the independent variables would be same. The number of decision trees would be 350. Store the result in 'mod_forest2'
+#b. Find the importance of the independent variables & also plot it
+#c. Predict the values on top of test set & store the result in 'result_forest2'
+#d. Build a confusion matrix for the actual values & predicted values
+#e. Find out the accuracy from the confusion matrix
+```
+
+#### Building Random-Forest Model
+
+```{r}
+# Building Model
+mod_forest2 <- randomForest(gender ~ MonthlyCharges +tenure, data = churn_4_train, 
+                            ntree = 350)
+
+# Checking MeanDecreaseGini for the model using importance()
+importance(mod_forest2)
+
+# Plotting MeanDecreaseGini for the model using varImpPlot()
+varImpPlot(mod_forest2)
+```
+
+#### Predicting on test-data
+
+```{r}
+mod_forest2_pred <- predict(mod_forest2, newdata = churn_4_test)
+
+# Checking first ten predictions for test-data
+head(as.data.frame(mod_forest2_pred),10)
+```
+
+#### Building Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$gender, mod_forest2_pred)
+```

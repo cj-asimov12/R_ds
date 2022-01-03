@@ -1,0 +1,486 @@
+---
+title: "R : Project 4 : Credit Card Fraud Detection"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('ggplot2')
+library('rpart')
+library('rpart.plot')
+library('ROSE')
+library('smotefamily')
+```
+
+### Loading the data-set
+
+```{r}
+cc <- read.csv("/home/carb0n/Desktop/r/d/p4/creditcard.csv")
+```
+
+### Preparing the data
+
+#### Looking at structure of data-set
+
+```{r}
+str(cc)
+```
+
+#### Converting Dependent Variable ("Class") to factor
+
+```{r}
+cc$Class <- as.factor(cc$Class)
+```
+
+#### Looking at summary of data-set
+
+```{r}
+summary(cc)
+```
+
+#### Checking for missing values
+
+```{r}
+sum(is.na(cc))
+```
+
+### Exploring and Analyzing the data (EDA)
+
+#### Distrubution of legitimate and fraud transactions
+
+```{r}
+table(cc$Class)
+```
+
+#### Percentage distribution of legitimate and fraud transactions
+
+```{r}
+pcnt <- prop.table(table(cc$Class))
+pcnt
+```
+
+#### Pie chart of credit card transactions
+
+```{r}
+labels <- paste(c("legit","fraud"), round((100*pcnt),2),"%")
+pie(table(cc$Class),labels,col=c("orange","red"))
+```
+
+#### Predictions Without Model And Confusion-Matrix
+```{r}
+predictions <- rep.int(0, nrow(cc))
+predictions <- factor(predictions, levels = c(0,1))
+
+confusionMatrix(data = predictions, reference = cc$Class)
+```
+
+### Sampling the data
+
+#### Creating sample data-set
+
+```{r}
+set.seed(1)
+cc_sample <- cc %>% sample_frac(0.1)
+```
+
+### Exploring sampled data
+
+#### Checking structure of sample data-set
+
+```{r}
+str(cc_sample)
+```
+
+#### Checking distribution of "Class" column
+
+```{r}
+table(cc_sample$Class)
+```
+
+#### Plotting scatter plot showing distribution of class column 
+
+```{r}
+ggplot(data = cc_sample, aes(x = V1, y = V2, col = Class))+
+  geom_point()+
+  theme_bw()+
+  scale_color_manual(values = c("dodgerblue2", "red"))
+```
+
+### Splitting the data-set
+
+#### Creating training and test sets for fraud detection 
+
+```{r}
+set.seed(1)
+data_sample <- sample.split(cc_sample$Class,SplitRatio = 0.80)
+train_data <- subset(cc_sample, data_sample==TRUE)
+test_data <- subset(cc_sample, data_sample==FALSE)
+```
+
+#### Checking structure of train data
+
+```{r}
+str(train_data)
+```
+
+#### Checking structure of test data
+
+```{r}
+str(test_data)
+```
+
+#### Checking dimensions of train data
+
+```{r}
+dim(train_data)
+```
+
+#### Checking dimensions of test data
+
+```{r}
+dim(test_data)
+```
+
+### Random Over Sampling (ROS) Method
+
+#### Checking distribution of "Class" in train data
+
+```{r}
+table(train_data$Class)
+```
+
+#### Setting threshold for legit transaction
+
+```{r}
+n_legit <- 1594
+new_frac_legit <- 0.50
+new_n_total <- n_legit/new_frac_legit 
+new_n_total
+
+```
+
+#### Performing Random-Over-Sampling (ROS)
+```{r}
+oversampling_result <- ovun.sample(Class ~ .,
+                                   data = train_data,
+                                   method = "over",
+                                   N = new_n_total,
+                                   seed = 2021)
+```
+
+#### Storing Random-Over-Sampling (ROS) results
+
+```{r}
+oversampled_credit <- oversampling_result$data
+```
+
+#### Checking distribution of "Class" in Random-Over-Sampling (ROS) results
+
+```{r}
+table(oversampled_credit$Class)
+```
+
+#### Plotting distribution of "Class" in Random-Over-Sampling (ROS) results
+
+```{r}
+ggplot(data = oversampled_credit, aes(x = V1, y = V2, col = Class))+
+  geom_point(position = position_jitter(width = 0.1))+
+  theme_bw()+
+  scale_color_manual(values = c("dodgerblue2", "red"))
+```
+
+### Random Under Sampling (RUS) Method  
+
+#### Checking distribution of "Class" in train data
+
+```{r}
+table(train_data$Class)
+```
+
+#### Setting threshold for fraud transaction
+
+```{r}
+n_fraud <- 6
+new_frac_fraud <- 0.50
+new_n_total <- n_fraud/new_frac_fraud
+new_n_total
+```
+
+#### Performing Random-Under-Sampling (RUS)
+
+```{r}
+undersampling_result <- ovun.sample(Class ~ .,
+                                   data = train_data,
+                                   method = "under",
+                                   N = new_n_total,
+                                   seed = 2021)
+```
+
+#### Storing Random-Under-Sampling (RUS) results
+
+```{r}
+undersampled_credit <- undersampling_result$data
+```
+
+#### Checking distribution of "Class" in Random-Under-Sampling (RUS) results
+
+```{r}
+table(undersampled_credit$Class)
+```
+
+#### Plotting distribution of "Class" in Random-Under-Sampling (RUS) results
+
+```{r}
+ggplot(data = undersampled_credit, aes(x = V1, y = V2, col = Class))+
+  geom_point()+#(position = position_jitter(width = 0.1))
+  theme_bw()+
+  scale_color_manual(values = c("dodgerblue2", "red"))
+```
+
+### Using Both Random-Over-Sampling (ROS) And Random-Under-Sampling (RUS) Methods
+
+#### Storing number of rows of train data
+```{r}
+n_new <- nrow(train_data)
+n_new
+```
+
+#### Setting threshold
+
+```{r}
+fraction_fraud_new <- 0.50
+```
+
+#### Performing Random-Over-Sampling (ROS) AND Random-Under-Sampling (RUS)
+
+```{r}
+sampling_result <- ovun.sample(Class ~ .,
+                               data = train_data,
+                               method = "both",
+                               N = n_new,
+                               p = fraction_fraud_new,
+                               seed = 2021)
+```
+
+#### Storing Sampling results
+
+```{r}
+sampled_credit <- sampling_result$data
+```
+
+#### Checking properties of sampling results
+
+```{r}
+nrow(sampled_credit)
+table(sampled_credit$Class)
+prop.table(table(sampled_credit$Class))
+```
+
+#### Plotting distribution of "Class" in sampling results
+
+```{r}
+ggplot(data = sampled_credit, aes(x = V1, y = V2, col = Class))+
+  geom_point()+#(position = position_jitter(width = 0.1))
+  theme_bw()+
+  scale_color_manual(values = c("dodgerblue2", "red"))
+```
+
+### Using SMOTE to balance the data-set
+
+#### Checking distribution of "Class" in train data
+
+```{r}
+table(train_data$Class)
+```
+
+#### Set no. of fraud & legitimate cases and desired % of legitimate cases
+
+```{r}
+n0 <- 1594
+n1 <- 6
+r0 <- 0.6
+```
+
+#### Calculate the value for the dup_size parameter of SMOTE
+
+```{r}
+ntimes <- ((1-r0)/r0) * (n0/n1) - 1
+```
+
+#### Performing SMOTE operation
+
+```{r}
+smote_output <- SMOTE(X = train_data[ ,-c(1,31)],
+                      target = train_data$Class,
+                      K = 5,
+                      dup_size = ntimes)
+```
+
+#### Storing SMOTE-Balanced data
+
+```{r}
+credit_smote <- smote_output$data
+```
+
+#### Changing column-name for column-30 to "Class"
+
+```{r}
+colnames(credit_smote)[30] <- "Class"
+```
+
+#### Checking properties of SMOTE data
+
+```{r}
+nrow(credit_smote)
+table(credit_smote$Class)
+prop.table(table(credit_smote$Class))
+```
+
+#### Plotting distribution of "Class" in sampling results
+
+```{r}
+ggplot(data = credit_smote, aes(x = V1, y = V2, col = Class))+
+  geom_point()+#(position = position_jitter(width = 0.1))
+  theme_bw()+
+  scale_color_manual(values = c("dodgerblue2", "red"))
+```
+
+## (A) Model Building, Prediction And Accuracy (For Sampled Data)
+
+### (1) Using SMOTE-Balanced Data
+
+### Building Decision-Tree Model using SMOTE-balanced data
+
+```{r}
+# Building Model
+CART_model <- rpart(Class~., credit_smote)
+
+# Checking Summary
+summary(CART_model)
+```
+
+#### Plotting decision-tree model 
+
+```{r}
+rpart.plot(CART_model, extra = 0, type = 5, tweak = 1.2)
+```
+
+#### Predicting fraud cases
+
+```{r}
+predicted_val <- predict(CART_model, test_data, type = "class") 
+
+# Viewing Predictions
+head(predicted_val)
+```
+
+#### Building Confusion-Matrix
+
+```{r}
+confusionMatrix(predicted_val, test_data$Class)
+```
+
+### (2) Without Using SMOTE-Balanced Data
+
+### Building Decision-Tree Model without using SMOTE-balanced data
+
+```{r}
+# Building Model
+CART_model <- rpart(Class~., train_data[,-1])
+
+# Checking Summary
+```
+
+#### Plotting decision-tree model 
+
+```{r}
+rpart.plot(CART_model, extra = 0, type = 5, tweak = 1.2)
+```
+
+#### Predicting fraud cases
+
+```{r}
+predicted_val <- predict(CART_model, test_data[,-1], type = "class")
+head(predicted_val)
+```
+
+#### Building Confusion-Matrix
+
+```{r}
+confusionMatrix(predicted_val, test_data$Class)
+```
+
+## (B) Model Building, Prediction And Accuracy (For Whole Data)
+
+### (1) Using SMOTE-Balanced data
+
+#### Building decision-tree model 
+
+```{r}
+CART_model <- rpart(Class~., credit_smote)
+summary(CART_model)
+```
+
+#### Plotting decision-tree model 
+
+```{r}
+rpart.plot(CART_model, extra = 0, type = 5, tweak = 1.2)
+```
+
+#### Predicting fraud cases
+
+```{r}
+predicted_val <- predict(CART_model, cc[,-1], type = "class") 
+head(predicted_val)
+```
+
+#### Building Confusion-Matrix
+
+```{r}
+confusionMatrix(predicted_val, cc$Class)
+```
+
+### (2) Without Using SMOTE-Balanced Data
+
+#### Building decision-tree model without using SMOTE data
+
+```{r}
+CART_model <- rpart(Class~., train_data[,-1])
+summary(CART_model)
+```
+
+#### Plotting decision-tree model 
+
+```{r}
+rpart.plot(CART_model, extra = 0, type = 5, tweak = 1.2)
+```
+
+#### Predicting fraud cases
+
+```{r}
+predicted_val <- predict(CART_model, cc[,-1], type = "class")
+head(predicted_val)
+```
+
+#### Building Confusion-Matrix
+
+```{r}
+confusionMatrix(predicted_val, cc$Class)
+```

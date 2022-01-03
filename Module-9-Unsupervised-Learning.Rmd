@@ -1,0 +1,310 @@
+---
+title: "R : Module 9 : Unsupervised Learning"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 9 : Assignment 1-4
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+```
+
+#### Task-1
+
+```{r}
+#a. Build the kmeans algorithm on top of 'customer_features'. For the model, the number of clusters should be 3.
+#b. Calculate the clustering vector values for the monthly charges column form the customer_features.
+#c. Bind the monthly charges column to the clustering vector and store that data in month_group.
+#d. Convert the month_group matrix into a data frame.
+#e. Separate all the 3 clusters with their values. 
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### K-Means Model  
+
+```{r}
+# Selecting specific columns to create data-frame
+churn_4 %>% select("tenure", "MonthlyCharges", "TotalCharges") -> customer_features
+
+# Building kmeans algorithm on top of data-frame
+kmeans(customer_features$MonthlyCharges, 3) -> k_month
+
+# Checking clustering vector values
+head(k_month$cluster)
+
+# Binding clustering vector values to column and converting to data-frame
+cbind(Month = customer_features$MonthlyCharges, Cluster = k_month$cluster) -> month_group
+as.data.frame(month_group) -> month_group
+head(month_group)
+```
+
+#### Separating Clustering Vector Values
+
+```{r}
+# Separating clustering vector values for each cluster
+month_group %>% filter(Cluster==1) -> month_group_1
+month_group %>% filter(Cluster==2) -> month_group_2
+month_group %>% filter(Cluster==3) -> month_group_3
+
+# Checking separated cluster values for each cluster
+head(month_group_1)
+head(month_group_2)
+head(month_group_3)
+```
+
+## Module 9: Case Study 1 - Recommender System 
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('reshape2')
+library('recommenderlab')
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+ratings <- read.csv('/home/carb0n/Desktop/r/d/movielense/ratings.csv')
+
+# Loading the data-set
+movies <- read.csv('/home/carb0n/Desktop/r/d/movielense/movies.csv', stringsAsFactors = FALSE)
+```
+
+#### Separating all the movies rated less often
+
+```{r}
+# Selecting movies rated less often (only include top 30% rated movies)
+df_movie_summary = ratings %>% group_by(movieId) %>% summarise(count = n(),mean(rating))
+movie_benchmark = round(quantile(df_movie_summary$count,0.70, names = FALSE),0)
+drop_movie_list = df_movie_summary[df_movie_summary$count < movie_benchmark,1]
+drop_movie_list = as.data.frame(drop_movie_list)
+head(drop_movie_list)
+```
+
+#### Separating all the users who rate less often
+
+```{r}
+# Creating data-frame of all the inactive users (users who rate less often)
+df_movie_summary1 = ratings %>% group_by(userId) %>% summarise(count = n(),mean(userId))
+cust_benchmark = round(quantile(df_movie_summary1$count,0.70, names = FALSE),0)
+drop_cust_list = df_movie_summary1[df_movie_summary1$count < cust_benchmark,1]
+drop_cust_list = as.data.frame(drop_cust_list)
+head(drop_cust_list)
+```
+
+#### Removing all the movies rated less often and the users who rate less often
+
+```{r}
+ratings = anti_join(ratings, drop_movie_list, by = "movieId")
+ratings = anti_join(ratings, drop_cust_list, by = "userId")
+```
+
+#### Reshaping the data
+
+```{r}
+# Creating ratings matrix for movie-ratings with Rows = userId, Columns = movieId
+ratingmat <- dcast(ratings, userId~movieId, value.var = "rating", na.rm=FALSE)
+
+# Removing UserID column as it is not needed
+ratingmat <- as.matrix(ratingmat[,-1]) #remove userIds
+
+# Converting rating matrix into a recommenderlab sparse matrix
+ratingmat <- as(ratingmat, "realRatingMatrix")
+```
+
+#### Normalizing the data
+
+```{r}
+ratingmat_norm <- normalize(ratingmat)
+```
+
+#### Recommender Model using SVD (Singular Value Decomposition Method)
+
+```{r}
+recommender_model <- Recommender(ratingmat_norm, method = "SVD")
+
+# Obtain top 10 recommendations for 5th user in data-set
+recom <- predict(recommender_model, ratingmat[5], n=10) 
+
+# Converting recommenderlab object to a readable list
+recom_list <- as(recom, "list") 
+```
+
+#### Checking recommendations for the model
+
+```{r}
+recom_result <- matrix(0,10)
+
+for (i in c(1:10)){
+  recom_result[i] <- movies[as.integer(recom_list[[1]][i]),2]
+}
+
+# Printing top 10 recommendations
+recom_result
+```
+
+#### Evaluating the model
+
+```{r}
+# Checking evaluation metrics for the SVD model using the 5-fold cross-validation
+evaluation_scheme <- evaluationScheme(ratingmat, method="cross-validation", k=5, given=3, goodRating = 5) 
+
+# Performing evaluation metrics for top 1,3,5, and 10 recommendations
+evaluation_results <- evaluate(evaluation_scheme, method="SVD", n=c(1,3,5,10))
+
+# Storing evaluation results 
+eval_results <- getConfusionMatrix(evaluation_results)[[1]]
+
+# Printing the evaluation results
+eval_results
+```
+
+### Module 9: Case Study 2 - K-Means Algorithm
+
+#### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+```
+
+#### Task-1 : Building the k-means clustering algorithm
+
+```{r}
+# a.Start off by extracting the ‘MonthlyCharges’, ‘tenure’ & ‘TotalCharges’ columns from the ‘customer_churn’ data.frame.Store the result in ‘customer_features’
+# b.Remove any ‘NA’ values from ‘customer_features’ if present
+# c.Build the k-means algorithm on top of ‘customer_features’.Here, the number of clusters should be 3
+# d.Bind the clustering vector to ‘customer_features’.
+# e.Extract observations belonging to individual clusters
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### K-Means Model
+
+```{r}
+# Selecting specific columns to create data-frame
+churn_4 %>% select("tenure", "MonthlyCharges", "TotalCharges") -> customer_features
+
+# Building kmeans algorithm on top of data-frame
+kmeans(customer_features$MonthlyCharges, 3) -> k_month
+
+# Checking clustering vector values
+head(k_month$cluster)
+
+# Binding clustering vector values to column and converting to data-frame
+cbind(Month = customer_features$MonthlyCharges, Cluster = k_month$cluster) -> month_group
+as.data.frame(month_group) -> month_group
+head(month_group)
+```
+
+#### Separating Clustering Vector Values
+
+```{r}
+# Separating clustering vector values for each cluster
+month_group %>% filter(Cluster==1) -> month_group_1
+month_group %>% filter(Cluster==2) -> month_group_2
+month_group %>% filter(Cluster==3) -> month_group_3
+
+# Checking separated cluster values for each cluster
+head(month_group_1)
+head(month_group_2)
+head(month_group_3)
+```

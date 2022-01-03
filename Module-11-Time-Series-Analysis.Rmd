@@ -1,0 +1,123 @@
+---
+title: "R : Module 11 : Time Series Analysis"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 11 : Case Study 1 - Time Series
+
+### Loading required packages
+
+```{r}
+library('aTSA')
+library('fUnitRoots')
+```
+
+### Exploring the data
+
+```{r}
+# Loading the data-set
+data("AirPassengers")
+ts <- AirPassengers
+
+# Checking class of data
+class(ts)
+
+# Checking beginning year of time-series
+start(ts)
+
+# Checking end year of time-series
+end(ts)
+
+# Checking summary of time-series
+summary(ts)
+
+# Viewing cycle of time-series
+cycle(ts)
+```
+
+### Plotting the data
+
+```{r}
+# Plotting time-series
+plot(ts)
+
+# Plotting box-plot of number-of-air-passengers (per-year) and cycle of time-series
+boxplot(ts~cycle(ts))
+
+#Decomposing the data into its trend, seasonal, and random error components
+ts_decom <- decompose(ts, type = "multiplicative")
+plot(ts_decom)
+```
+
+### Testing Assumptions 
+
+#### Augmented Dickey-Fuller Test (For Stationarity)
+
+```{r}
+adfTest(ts)
+adfTest(log(ts))
+adfTest(diff(ts))
+```
+
+#### KPSS-Test (For Stationarity)
+
+```{r}
+kpss.test(ts)
+```
+
+#### ACF-Test (Auto-Correlation Test)
+
+```{r}
+acf(ts)
+acf(diff(ts))
+```
+
+#### PACF-Test (Partial Auto-Correlation Test)
+
+```{r}
+pacf(diff(ts))
+plot(diff(log(ts)))
+```
+
+##### Based on results from above tests, the time-series satisfies stationarity assumption.
+
+### Building ARIMA model
+
+```{r}
+# Creating ARIMA model on "AirPassengers" data-set
+mod_time <- arima(log(ts), c(0,1,1), seasonal=list(order=c(0,1,1), period=12))
+
+# Checking model details
+mod_time
+```
+
+### Predicting for next 20 years
+
+```{r}
+# Predicting for next 20 years
+pred_time <- predict(mod_time, n.ahead=20*12)
+head(pred_time)
+
+# Finding inverse of log for predicted values
+pred_time_1 <- round(2.718^pred_time$pred,0)
+head(pred_time_1)
+```
+
+### Plotting actual values and predicted values (using log scale and dotted lines for predicted values)
+
+```{r}
+ts.plot(ts, pred_time_1, log="y", lty=c(1,3))
+```

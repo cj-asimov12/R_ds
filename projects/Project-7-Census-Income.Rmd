@@ -1,0 +1,571 @@
+---
+title: "R : Project 7 : Census Income"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('ggplot2')
+library('caret')
+library('stringr')
+library('ROCR')
+library('randomForest')
+library('rpart')
+library('rpart.plot')
+```
+
+### Loading the data-set
+
+```{r}
+census <- read.csv("/home/carb0n/Desktop/r/d/p7/census-income.csv") 
+```
+
+
+### Preparing the data
+
+#### Looking at the structure of the data-set
+
+```{r}
+str(census)
+```
+
+#### Replacing " ?" with NA for character type columns
+
+```{r}
+census[census == " ?"] <- NA
+```
+
+#### Checking for null values
+
+```{r}
+sum(is.na(census))
+```
+
+#### Removing all NA values
+
+```{r}
+census <- na.omit(census)
+```
+
+#### Removing white spaces for character type columns
+
+```{r}
+census <- census %>% mutate_if(is.character, str_trim)
+```
+
+#### Converting all character type columns to factor type
+
+```{r}
+census <- census %>% mutate_if(sapply(census, is.character), as.factor)
+```
+
+### Data Manipulation
+
+#### Extracting education column and storing in census_ed
+
+```{r}
+census_ed <- census %>% select(education) 
+head(census_ed)
+```
+
+#### Extracting all columns from "age" to "relationship" and storing in census_seq
+
+```{r}
+census_seq <- census %>% select(age:relationship)
+head(census_seq)
+```
+
+#### Extracting columns 5, 8, 11 and storing in census_col
+
+```{r}
+census_col <- census %>% select(5,8,11)
+head(census_col)
+```
+
+#### Extracting all the "Male" employees who work in state-gov and storing in male_gov
+
+```{r}
+male_gov <- census %>% select(sex,workclass) %>% filter(sex=="Male" & workclass=="State-gov")
+head(male_gov)
+```
+
+#### Extracting all the 39 year old who either have bachelor's degree or are native of U.S. and storing in census_us
+
+```{r}
+census_us <- census %>% select(age,education,native.country) %>% filter(age==39,education=="Bachelors"|native.country=="United-States")
+
+head(census_us)
+```
+
+#### Extracting 200 random rows from the “census” data frame and storing it in “census_200”.
+
+```{r}
+census_200 <- census %>% sample_n(200) 
+head(census_200)
+```
+
+#### Count for different levels of "workclass" column
+
+```{r}
+census %>% count(workclass)
+```
+
+#### Calculating the mean of "capital gain" column and grouping it accoring to "workclass" column
+
+```{r}
+census %>% group_by(workclass) %>% summarise(mean(capital.gain))
+```
+
+### Data Visualization
+
+#### (A) BAR PLOT
+
+```{r}
+# Bar-plot for the “relationship” column and filled the bars according to the “race” column.
+# Fill the bars according to "sex"
+# Set the Position of the bars to "dodge"
+# Set title of the plot to be "Distribution of Relationships by Sex"
+
+ggplot(data = census, aes(x = relationship, fill = sex))+
+  geom_bar(position = "dodge")+
+  labs(x = "Categories of Relationships", y = "Count of Categories",
+       title = "Distribution of Relationships by Sex")
+```
+
+
+#### (B) HISTOGRAM
+
+```{r}
+# Histogram for "age" column with number of bins = 50, fill with yearly income (X)
+# Set title to be Distribution of Age
+# Set legend title to be "Yearly Income"
+# Set theme of the plot to be black and white
+
+ggplot(data = census, aes(x = age, fill = X))+
+  geom_histogram(bins = 50)+
+  labs(title = "Distribution of Age", fill = "Yearly Income")+
+  theme_bw()
+```
+
+#### (C) SCATTER PLOT
+
+```{r}
+# Scatter plot between capital gain and hours per week
+# Set Transparency of the points to 40% and size as 2
+# Set color of the points according to X (Yearly Income) column
+# Set labels
+
+ggplot(data = census, aes(x = capital.gain, y = hours.per.week, col = X))+
+  geom_point(alpha = 0.6, size = 2)+
+  labs(x = "Capital Gain", y = "Hours Per Week", col = "Yearly Income")
+```
+
+#### (D) BOX PLOT
+
+```{r}
+# Box plot between eucation and age column
+# Fill according to sex column
+# Set title to "Box plot of age by education and sex)
+
+ggplot(data = census, aes(x = education, y = age, fill = sex))+
+  geom_boxplot()+
+  labs(title = "Box-Plot of Age by Education and Sex")
+```
+
+### (1) Linear Regression
+
+### Splitting the data-set
+
+```{r}
+set.seed(1)
+sample_tag <- sample.split(census$hours.per.week, SplitRatio = 0.7)
+train_data <- subset(census, sample_tag==TRUE)
+test_data <- subset(census, sample_tag==FALSE)
+
+nrow(train_data)
+nrow(test_data)
+```
+
+#### Building Linear Regression Model
+
+```{r}
+lr_model <- lm(hours.per.week ~ education.num, data = train_data)
+```
+
+#### Checking Summary of the Linear Regression Model
+
+```{r}
+summary(lr_model)
+```
+
+#### Predicting on test data-set using linear regression model
+
+```{r}
+lr_pred_val <- predict(lr_model, newdata = test_data) 
+```
+
+#### Checking predicted values for linear regression model
+
+```{r}
+head(lr_pred_val)
+```
+
+#### Binding predicted values with actual values to find error
+
+```{r}
+lr_final_data <- cbind(Actual = test_data$hours.per.week, Predicted = lr_pred_val)
+lr_final_data <- as.data.frame(lr_final_data)
+head(lr_final_data)
+```
+
+#### Finding RMSE (root-mean-squared-error)
+
+```{r}
+lr_final_data <- lr_final_data %>% mutate(error = lr_final_data$Actual - lr_final_data$Predicted)
+sqrt(mean(lr_final_data$error)^2)
+
+# RMSE = 0.03315308
+# Accuracy = 99.97%
+```
+
+### (2) Simple Logistic Regression Model
+
+#### Splitting the data-set
+
+```{r}
+set.seed(1)
+sample_tag <- sample.split(census$X, SplitRatio = 0.65)
+train_data <- subset(census, sample_tag==TRUE)
+test_data <- subset(census, sample_tag==FALSE)
+
+nrow(train_data)
+nrow(test_data)
+```
+
+#### Building Logistic Regrssion Model
+
+```{r}
+log_model_1 <- glm(X ~ occupation, data = train_data, family = "binomial")
+```
+
+#### Checking summary of the model
+
+```{r}
+summary(log_model_1)
+```
+
+#### Predicting on test-data
+
+```{r}
+log_pred_val_1 <- predict(log_model_1, newdata = test_data, type = "response") 
+```
+
+#### Checking predicted values 
+
+```{r}
+head(log_pred_val_1)
+```
+
+#### Checking range of predicted values
+
+```{r}
+range(log_pred_val_1)
+```
+
+#### Plotting Accuracy v/s cut-off and finding an ideal value for cut-off
+
+```{r}
+predict_log_acc_1 <- prediction(log_pred_val_1, test_data$X)
+```
+
+#### Using performance() to check accuracy 
+
+```{r}
+log_acc_1 <- performance(predict_log_acc_1, "acc")
+```
+
+#### Plotting "log_acc_1" to find value where accuracy is constant
+
+```{r}
+plot(log_acc_1)
+```
+
+##### Ideal cut-off (threshold) value based on plot => 0.47
+
+#### Checking range of predicted values
+
+```{r}
+range(log_pred_val_1)
+```
+
+#### Checking distribution of dependent variable
+
+```{r}
+table(census$X)
+```
+
+#### Finding Accuracy using threshold
+
+```{r}
+log_pred_1 <- ifelse(log_pred_val_1 > 0.47, ">50K", "<=50K")
+cm_log_1 <- table(log_pred_1, test_data$X)
+cm_log_1
+
+sum(diag(cm_log_1))/sum(cm_log_1)
+# Accuracy = 74%
+```
+
+#### Building confusion matrix  and finding accuracy
+
+```{r}
+confusionMatrix(factor(log_pred_1),test_data$X)
+# Accuracy = 74%
+```
+
+#### Plotting ROC Curve
+
+```{r}
+log_roc_1 <- performance(predict_log_acc_1, "tpr", "fpr")
+plot(log_roc_1)
+```
+
+#### Finding AUC (Area Under the Curve)
+
+```{r}
+log_auc_1 <- performance(predict_log_acc_1, "auc")
+log_auc_val_1 <- log_auc_1@y.values[[1]]
+log_auc_val_1
+# AUC = 0.7256113
+```
+
+### (3) Multiple Logistic Regression Model
+
+#### Splitting the data-set
+
+```{r}
+set.seed(1)
+sample_tag <- sample.split(census$X, SplitRatio = 0.80)
+train_data <- subset(census, sample_tag==TRUE)
+test_data <- subset(census, sample_tag==FALSE)
+
+nrow(train_data)
+nrow(test_data)
+```
+
+#### Building Logistic Regression Model
+
+```{r}
+log_model_2 <- glm(X ~ age+workclass+education, data = train_data, family = "binomial")
+```
+
+#### Checking summary of the Logistic Regression Model
+
+```{r}
+summary(log_model_2)
+```
+
+#### Predicting on test-data 
+
+```{r}
+log_pred_val_2 <- predict(log_model_2, newdata = test_data, type = "response") 
+```
+
+#### Checking predicted values 
+
+```{r}
+head(log_pred_val_2)
+```
+
+#### Checking range of predicted values
+
+```{r}
+range(log_pred_val_2)
+```
+
+#### Plotting Accuracy v/s cut-off and finding an ideal value for cut-off
+
+```{r}
+predict_log_acc_2 <- prediction(log_pred_val_2, test_data$X)
+```
+
+#### Using performance() to check accuracy
+
+```{r}
+log_acc_2 <- performance(predict_log_acc_2, "acc")
+```
+
+#### Plotting "log_acc_1" to find value where accuracy is constant
+
+```{r}
+plot(log_acc_2)
+```
+
+##### Ideal cut-off value based on plot => 0.45
+
+#### Checking distribution of dependent variable 
+
+```{r}
+table(census$X)
+```
+
+#### Setting threshold for prediction
+
+```{r}
+log_pred_2 <- ifelse(log_pred_val_2 > 0.45, ">50K", "<=50K")
+```
+
+#### Finding accuracy
+
+```{r}
+cm_log_2 <- table(log_pred_2, test_data$X)
+cm_log_2
+
+sum(diag(cm_log_2))/sum(cm_log_2)
+```
+
+#### Building confusion-matrix and finding accuracy
+
+```{r}
+confusionMatrix(factor(log_pred_2),test_data$X)
+```
+
+#### Plotting the ROC Curve
+
+```{r}
+log_roc_2 <- performance(predict_log_acc_2, "tpr", "fpr")
+plot(log_roc_2)
+```
+
+#### Finding AUC (Area Under the Curve)
+
+```{r}
+log_auc_2 <- performance(predict_log_acc_2, "auc")
+log_auc_val_2 <- log_auc_2@y.values[[1]]
+log_auc_val_2
+# AUC = 0.7741555
+```
+
+### (4) Decision Tree
+
+#### Splitting the data-set
+
+```{r}
+set.seed(1)
+sample_tag <- sample.split(census$X, SplitRatio = 0.70)
+train_data <- subset(census, sample_tag==TRUE)
+test_data <- subset(census, sample_tag==FALSE)
+
+nrow(train_data)
+nrow(test_data)
+```
+
+#### Building decision tree model
+
+```{r}
+census_dt <- rpart(formula = X ~ .,
+                   data = train_data,
+                   method = "class")
+```
+
+#### Plotting the decision tree
+
+```{r}
+rpart.plot(x = census_dt, type = 5, extra = 0, tweak = 1.2)
+```
+
+#### Predicting on test-data
+
+```{r}
+class_pred_dt <- predict(object = census_dt,
+                      newdata = test_data,
+                      type = "class")
+```
+
+#### Finding Accuracy
+
+```{r}
+table_dt <- table(Prediction = class_pred_dt, Actual = test_data$X) 
+sum(diag(table_dt))/sum(table_dt)
+# Accuracy = 0.8389
+```
+
+#### Building Confusion Matrix and Finding Accuracy
+
+```{r}
+confusionMatrix(class_pred_dt, test_data$X)
+# Accuracy = 84%
+```
+
+### (5) Random Forest
+
+#### Splitting the data-set
+
+```{r}
+set.seed(1)
+sample_tag <- sample.split(census$X, SplitRatio = 0.80)
+train_data <- subset(census, sample_tag==TRUE)
+test_data <- subset(census, sample_tag==FALSE)
+
+nrow(train_data)
+nrow(test_data)
+```
+
+#### Building random-forest model
+
+```{r}
+census_rf <- randomForest(formula = X ~ .,
+                          data = train_data,
+                          ntree = 300)
+```
+
+#### Printing the random-forest model details
+
+```{r}
+print(census_rf)
+```
+
+#### Plotting the random-forest model
+
+```{r}
+plot(census_rf)
+```
+
+#### Predicting on test-data
+
+```{r}
+class_pred_rf <- predict(object = census_rf,
+                         newdata = test_data,
+                         type = "class")
+```
+
+#### Finding Accuracy
+
+```{r}
+table_rf <- table(Prediction = class_pred_rf, Actual = test_data$X)
+table_rf
+
+sum(diag(table_rf))/sum(table_rf)
+# Accuracy = 85.7%
+```
+
+#### Building confusion-matrix and finding accuracy
+
+```{r}
+confusionMatrix(class_pred_rf, test_data$X)
+```

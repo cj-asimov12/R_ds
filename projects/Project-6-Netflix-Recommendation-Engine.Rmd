@@ -1,0 +1,332 @@
+---
+title: "R : Project 6 : Netflix Recommender System Using Recommenderlab"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('reshape2')
+library('ggplot2')
+library('recommenderlab') 
+```
+
+### Loading the netflix data-set
+
+```{r}
+data1 <- read.csv("/home/carb0n/Desktop/r/d/p6/combined_data_1.txt", sep = ",", header = FALSE, stringsAsFactors = FALSE)
+```
+
+### Preparing the data
+
+#### Viewing first few records from beginning
+```{r}
+head(data1)
+```
+
+#### Checking structure of the data-set
+
+```{r}
+str(data1)
+```
+
+#### Removing column "" as it is not needed
+
+```{r}
+data1 <- data1[,-3]
+```
+
+#### Renaming columns
+
+```{r}
+colnames(data1) <- c("Cust_Id", "Rating")
+head(data1)
+```
+
+#### Checking for NA values
+
+```{r}
+sum(is.na(data1))
+```
+
+### Exploring the data
+
+#### Total count of different ratings in the data-set
+
+```{r}
+data <- data1 %>% group_by(Rating) %>% summarise(count = n())
+
+#### Removing the row showing count of NA values
+data <- data[-6,]
+
+#### Viewing count of different ratings
+head(data)
+```
+
+#### Movie-Count by counting NaN values
+
+```{r}
+movie_count <- sum(is.na(data1))
+```
+
+#### Unique customer count 
+
+```{r}
+cust_count <- data1 %>% summarise(n_distinct(Cust_Id)) - movie_count
+
+# Converting obtained count to integer format
+cust_count <- as.integer(cust_count)
+
+# Viewing unique customer count
+cust_count
+```
+
+#### Total count of ratings given
+
+```{r}
+rating_count <- (nrow(data1)) - movie_count
+
+# Viewing total count of ratings given
+rating_count
+```
+
+### Plotting the data
+
+#### To disable the scientific notation on axis-scale and instead show actual value
+
+```{r}
+options(scipen = 999)
+```
+
+#### Plotting total count of rated movies, ratings and customers
+
+```{r}
+ggplot(data, aes(factor(Rating), y = count, fill = factor(Rating)))+
+  geom_bar(stat = "identity")+
+  geom_text(aes(label = sprintf("%d%%", round(count/sum(count) * 100))), vjust = -0.5)+
+  labs(x = "Rating", y = "Rating Count", fill = "Rating")+
+  labs(title = sprintf("Total Pool: %d Movies, %d Customers, %d Ratings Given\n",
+                       movie_count, cust_count, rating_count))+
+  theme_bw()
+```
+
+
+## Preprocessing the data
+
+### Loading the modified netflix data-set
+
+```{r}
+data <- read.csv("/home/carb0n/Desktop/r/d/p6/netflix_data.csv", stringsAsFactors = FALSE)
+head(data)
+```
+
+#### Removing column "X" as it is not needed
+
+```{r}
+data <- data[,-1]
+```
+
+### Loading the movie-titles data-set
+
+```{r}
+movies <- read.csv("/home/carb0n/Desktop/r/d/p6/movie_titles.csv", encoding = "ISO-8859-1", header = FALSE, stringsAsFactors = FALSE)
+```
+
+#### Renaming the columns
+
+```{r}
+colnames(movies) <- c("Movie_Id", "Year", "Name")
+```
+
+#### Checking the structure of the data-set
+```{r}
+str(movies)
+```
+
+### Preparing the data
+
+#### Grouping movies by their ratings count and mean rating
+
+```{r}
+df_movie_summary <- data %>% group_by(Movie_Id) %>% summarise(count = n(), mean(Rating))
+```
+
+#### Setting benchmark for including movies
+
+```{r}
+movie_benchmark <- round(quantile(df_movie_summary$count,0.7,names = FALSE),0)
+```
+
+#### Creating list of movies that are above benchmark
+
+```{r}
+drop_movie_list <- df_movie_summary[df_movie_summary$count < movie_benchmark,1]
+```
+
+#### Converting obtained list of movies to data-frame
+
+```{r}
+drop_movie_list <- as.data.frame(drop_movie_list)
+```
+
+#### Viewing list 
+
+```{r}
+head(drop_movie_list)
+```
+
+#### Grouping movies by count of ratings given and customer-id
+
+```{r}
+df_movie_summary1 <- data %>% group_by(Cust_Id) %>% summarise(count = n(),mean(Cust_Id))
+```
+
+#### Setting benchmark for including customer-id
+
+```{r}
+cust_benchmark <- round(quantile(df_movie_summary1$count,0.7,names = FALSE),0)
+```
+
+#### Creating list of customer-ids that are above benchmark
+
+```{r}
+drop_cust_list <- df_movie_summary1[df_movie_summary1$count < cust_benchmark,1]
+```
+
+#### Converting obtained list of movies to data-frame
+
+```{r}
+drop_cust_list <- as.data.frame(drop_cust_list)
+```
+
+#### Viewing list 
+
+```{r}
+head(drop_cust_list)
+```
+
+#### Removing Movies that don't satisfy the benchmark
+
+```{r}
+data <- anti_join(data, drop_movie_list, by = "Movie_Id")
+```
+
+#### Removing Customer IDs that don't satisfy the benchmark
+
+```{r}
+data <- anti_join(data, drop_cust_list, by = "Cust_Id")
+```
+
+#### Viewing updated data
+
+```{r}
+head(data)
+```
+
+### Preparing the ratingmatrix for recommenderlab
+
+#### Creating Rating Matrix where Rows = UserId and Columns = MovieId
+
+```{r}
+ratingmat <- dcast(data, Cust_Id~Movie_Id, value.var = "Rating", na.rm = FALSE)
+```
+
+#### Removing column "Cust_Id" 
+
+```{r}
+ratingmat <- as.matrix(ratingmat[,-1]) 
+```
+
+#### Converting rating matrix into recommenderlab sparse matrix
+
+```{r}
+ratingmat <- as(ratingmat, "realRatingMatrix")
+```
+
+#### Normalizing the data
+
+```{r}
+ratingmat_norm <- normalize(ratingmat)
+```
+
+### UBCF(User-Based-Collaborative-Filtering) Model Creation and Prediction
+
+#### Creating recommender model using "User-Based-Collaborative-Filtering" (UBCF) method
+
+```{r}
+recommender_model <- Recommender(ratingmat_norm, method = "UBCF", param = list(method = "Cosine",nn = 30))
+```
+
+#### Predicting for User-1 in test-data
+
+```{r}
+recom <- predict(recommender_model, ratingmat[1], n = 10)
+```
+
+#### Putting obtained recommendations for User-1 in test-data in list format
+
+```{r}
+recom_list <- as(recom, "list")
+```
+
+### Recommendations
+
+#### Creating an empty matrix to save recommended movie predictions
+
+```{r}
+recom_result <- matrix(0,10)
+```
+
+#### Obtaining top-3 recommendations for User-1 in test-data 
+
+```{r}
+for(i in c(1:10)){
+  recom_result[i] <- movies[as.integer(recom_list[[1]][i]),3]
+}
+```
+
+#### Viewing top-3 recommendations for User-1 in test-data 
+
+```{r}
+recom_result
+```
+
+### Evaluation
+
+#### Creating evaluationscheme with 3-fold cross-validation to evaluate the rating matrix
+
+```{r}
+evaluation_scheme <- evaluationScheme(ratingmat, method = "cross-validation", train = 0.8, k = 3, given = -1, goodRating = 5)
+```
+
+#### Performing evaluation using SVD (Single Value Decomposition) method
+
+```{r}
+evaluation_result <- evaluate(evaluation_scheme, method = "SVD", n = c(1,3,5,10))
+```
+
+#### Building confusion-matrix of evaluation results
+
+```{r}
+eval_result <- getConfusionMatrix(evaluation_result)[[1]]
+```
+
+#### Viewing confusion-matrix of evaluation results
+
+```{r}
+eval_result
+```

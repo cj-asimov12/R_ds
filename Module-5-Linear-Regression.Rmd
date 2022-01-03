@@ -1,0 +1,415 @@
+---
+title: "R : Module 5 : Linear Regression"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 5 : Assignment 1-11
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('ggplot2')
+```
+
+### (A) City-Temperature data-set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+city_1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Checking for NA values
+sum(is.na(city_1))
+
+# Removing State column as it is not needed
+city_1 <- within(city_1, rm(State))
+
+# Checking structure of data-set
+str(city_1)
+
+# Checking unique values in Year column
+unique(city_1$Year)
+
+# Replacing unique values "201" and "200" from Year column to "2001" and "2000" respectively 
+for(i in 1:nrow(city_1)){
+  if(city_1$Year[i]==200){
+    city_1$Year[i]=2000
+  }
+  else if(city_1$Year[i]==201){
+    city_1$Year[i]=2001
+  }
+}
+
+# Converting appropriate variables to factor-type 
+as.factor(city_1$Region) -> city_1$Region
+as.factor(city_1$Country) -> city_1$Country
+as.factor(city_1$City) -> city_1$City
+as.factor(city_1$Year) -> city_1$Year
+```
+
+#### Splitting the data-set into 70:30 ratio based on dependent feature
+
+
+```{r}
+set.seed(1)
+sample.split(city_1$AvgTemperature, SplitRatio=0.70) -> city_1_split_tag
+subset(city_1, city_1_split_tag==T) -> city_1_train
+subset(city_1, city_1_split_tag==F) -> city_1_test
+```
+
+#### Simple Linear Regression Model  for city_temperature data-set
+ 
+```{r}
+# Building Model
+lm(Month~AvgTemperature, data = city_1_train) -> city_1_model_1
+
+# Checking summary of simple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(city_1_model_1)
+
+# Predicting for test data
+predict(city_1_model_1, newdata = city_1_test) -> s_pv_1
+head(s_pv_1)
+
+# Finding value of error for predictions
+cbind(Acutal = city_1_test$Month, Predicted = s_pv_1) -> s_result_1
+as.data.frame(s_result_1) -> s_result_1
+
+s_result_1$Acutal - s_result_1$Predicted -> s_error_1
+cbind(s_result_1,s_error_1) -> s_result_1
+head(s_result_1)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((s_result_1$s_error_1)^2)) -> s_rmse_1
+s_rmse_1
+```
+
+#### Assumptions for Simple Linear Regression Model for city_temperature data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = city_1, aes(x=Month, y=AvgTemperature))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = s_result_1, aes(x=Predicted, y=s_error_3))+geom_point()
+plot(city_1_model_1, which = 1)
+
+# Checking for Normality of Errors
+#qqnorm(s_result_1$s_error_1)
+#qqline(s_result_1$s_error_1)
+plot(city_1_model_1, which = 2)
+```
+
+#### Multiple Linear Regression Model for city_temperature data-set
+
+```{r}
+# Building Model
+lm(Month~Country +Region +City +AvgTemperature, data = city_1_train) -> city_1_model_2
+
+# Checking summary of multiple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(city_1_model_2)
+
+# Predicting for test data
+predict(city_1_model_2, newdata = city_1_test) -> m_pv_1
+head(m_pv_1)
+
+# Finding value of error for predictions
+cbind(Acutal = city_1_test$Month, Predicted = m_pv_1) -> m_result_1
+as.data.frame(m_result_1) -> m_result_1
+
+m_result_1$Acutal - m_result_1$Predicted -> m_error_1
+cbind(m_result_1,m_error_1) -> m_result_1
+head(m_result_1)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((m_result_1$m_error_1)^2)) -> m_rmse_1
+m_rmse_1
+```
+
+#### Assumptions for Multiple Linear Regression Model for city_temperature data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = city_1, aes(x=Month, y=Country))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = city_1, aes(x=Month, y=Region))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = city_1, aes(x=Month, y=City))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = city_1, aes(x=Month, y=AvgTemperature))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = m_result_1, aes(x=Predicted, y=m_error_1))+geom_point()
+plot(city_1_model_2, which = 1)
+
+# Checking for Normality of Errors
+#qqnorm(m_result_1$m_error_1)
+#qqline(m_result_1$m_error_1)
+plot(city_1_model_2, which = 2)
+```
+
+### (B) Placement data-set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+placement_2 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Removing "sl_no" column from data-set as it is not needed
+placement_2 <- within(placement_2, rm(sl_no))
+
+# Checking for NA values
+colSums(is.na(placement_2))
+
+# Replacing NA values found in salary column with median value of salary column
+placement_2$salary[is.na(placement_2$salary)] <- median(placement_2$salary,na.rm=TRUE)
+
+# Checking structure of data-set
+str(placement_2)
+
+# Converting appropriate variables to factor-type
+as.factor(placement_2$gender) -> placement_2$gender
+as.factor(placement_2$ssc_b) -> placement_2$ssc_b
+as.factor(placement_2$hsc_b) -> placement_2$hsc_b
+as.factor(placement_2$hsc_s) -> placement_2$hsc_s
+as.factor(placement_2$degree_t) -> placement_2$degree_t
+as.factor(placement_2$workex) -> placement_2$workex
+as.factor(placement_2$specialisation) -> placement_2$specialisation
+as.factor(placement_2$status) -> placement_2$status
+as.integer(placement_2$salary) -> placement_2$salary
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+
+sample.split(placement_2$status, SplitRatio=0.80) -> placement_2_split_tag
+subset(placement_2, placement_2_split_tag==T) -> placement_2_train
+subset(placement_2, placement_2_split_tag==F) -> placement_2_test
+
+nrow(placement_2_train)
+nrow(placement_2_test)
+```
+
+#### Simple Linear Regression Model  for placement data-set
+
+```{r}
+# Building Model
+lm(etest_p~mba_p, data = placement_2_train) -> placement_2_model_1
+
+# Checking summary of simple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(placement_2_model_1)
+
+# Predicting for test data
+predict(placement_2_model_1, newdata = placement_2_test) -> s_pv_2
+head(s_pv_2)
+
+# Finding value of error for predictions
+cbind(Actual = placement_2_test$etest_p, Predicted = s_pv_2) -> s_result_2
+as.data.frame(s_result_2) -> s_result_2
+
+s_result_2$Actual - s_result_2$Predicted -> s_error_2
+cbind(s_result_2, s_error_2) -> s_result_2
+head(s_result_2)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((s_result_2$s_error_2)^2)) -> s_rmse_2
+s_rmse_2
+```
+
+#### Assumptions for Simple Linear Regression Model for placement data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = placement_2, aes(x=etest_p, y=mba_p))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = s_result_2, aes(x=Predicted, y=s_error_2))+geom_point()
+plot(placement_2_model_1, which = 1)
+
+# Checking for Normality of Errors
+#qqnorm(s_result_2$s_error_2)
+#qqline(s_result_2$s_error_2)
+plot(placement_2_model_1, which = 2)
+```
+
+#### Multiple Linear Regression Model for placement data-set
+
+```{r}
+# Building Model
+lm(etest_p~degree_p +mba_p +status, data = placement_2_train) -> placement_2_model_2
+
+# Checking summary of multiple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(placement_2_model_2)
+
+# Predicting for test data
+predict(placement_2_model_2, newdata = placement_2_test) -> m_pv_2
+head(m_pv_2)
+
+# Finding value of error for predictions
+cbind(Actual = placement_2_test$etest_p, Predicted = m_pv_2) -> m_result_2
+as.data.frame(m_result_2) -> m_result_2
+
+m_result_2$Actual - m_result_2$Predicted -> m_error_2
+cbind(m_result_2,m_error_2) -> m_result_2
+head(m_result_2)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((m_result_2$m_error_2)^2)) -> m_rmse_2
+m_rmse_2
+```
+
+#### Assumptions for Multiple Linear Regression Model for placement data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = placement_2, aes(x=etest_p, y=degree_p))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = placement_2, aes(x=etest_p, y=mba_p))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = placement_2, aes(x=etest_p, y=status))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = m_result_2, aes(x=Predicted, y=m_error_2))+geom_point()
+plot(placement_2_model_2, which = 1)
+
+# Checking for Normality of Errors
+#qqnorm(m_result_2$m_error_2)
+#qqlint(m_result_2$m_error_2)
+plot(placement_2_model_2, which = 2)
+```
+
+
+### (C) Pharmacovigilance data-set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+pharma_3 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Removing LocationID and PatientID columns as they are not needed
+pharma_3 <- within(pharma_3, rm(LocationID, PatientID))
+
+# Checking for NA values
+colSums(is.na(pharma_3))
+
+# Checking structure of the data-set
+str(pharma_3)
+
+# Converting appropriate variables to factor-type
+as.factor(pharma_3$Issues) -> pharma_3$Issues
+as.factor(pharma_3$DrugID) -> pharma_3$DrugID
+as.factor(pharma_3$Gender) -> pharma_3$Gender
+```
+
+#### Splitting the data-set into 75:25 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+
+sample.split(pharma_3$DrugID, SplitRatio=0.75) -> pharma_3_split_tag
+subset(pharma_3, pharma_3_split_tag==T) -> pharma_3_train
+subset(pharma_3, pharma_3_split_tag==F) -> pharma_3_test
+
+nrow(pharma_3_train)
+nrow(pharma_3_test)
+```
+
+#### Simple Linear Regression Model for pharmacovigilance data-set
+
+```{r}
+# Building Model
+lm(Age~DrugID, data = pharma_3_train) -> pharma_3_model_1
+
+# Checking summary of simple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(pharma_3_model_1)
+
+# Predicting for test data
+predict(pharma_3_model_1, newdata = pharma_3_test) -> s_pv_3
+head(s_pv_3)
+
+# Finding value of error for predictions
+cbind(Actual = pharma_3_test$Age, Predicted = s_pv_3) -> s_result_3
+as.data.frame(s_result_3) -> s_result_3
+
+s_result_3$Actual - s_result_3$Predicted -> s_error_3
+cbind(s_result_3, s_error_3) -> s_result_3
+head(s_result_3)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((s_result_3$s_error_3)^2)) -> s_rmse_3
+s_rmse_3
+```
+
+#### Assumptions for Simple Linear Regression Model for pharmacovigilance data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = pharma_3, aes(x=Age, y=DrugID))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = s_result_3, aes(x=Predicted, y=s_error_3))+geom_point()
+plot(pharma_3_model_1, which = 1)
+
+# Checking for Normality of Errors
+#qqnorm(s_result_3$s_error_3)
+#qqline(s_result_3$s_error_3)
+plot(pharma_3_model_1, which = 2)
+```
+
+#### Multiple Linear Regression Model for pharmacovigilance data-set
+
+```{r}
+# Building Model 
+lm(Age~Issues +DrugID +Gender, data = pharma_3_train) -> pharma_3_model_2
+
+# Checking summary of multiple linear regression model (F-Statistics and Adjusted R-Squared)
+summary(pharma_3_model_2)
+
+# Predicting for test data
+predict(pharma_3_model_2, newdata = pharma_3_test) -> m_pv_3
+head(m_pv_3)
+
+# Finding value of error for predictions
+cbind(Actual = pharma_3_test$Age, Predicted = m_pv_3) -> m_result_3
+as.data.frame(m_result_3) -> m_result_3
+
+m_result_3$Actual - m_result_3$Predicted -> m_error_3
+cbind(m_result_3, m_error_3) -> m_result_3
+head(m_result_3)
+
+# Finding root mean squared error (RMSE)
+sqrt(mean((m_result_3$m_error_3)^2)) -> m_rmse_3
+m_rmse_3
+```
+
+#### Assumptions for Multiple Linear Regression Model for pharmacovigilance data-set
+
+```{r}
+# Checking for Linearity
+ggplot(data = pharma_3, aes(x=Age, y=Issues))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = pharma_3, aes(x=Age, y=DrugID))+geom_point()+geom_smooth(method = "lm")
+ggplot(data = pharma_3, aes(x=Age, y=Gender))+geom_point()+geom_smooth(method = "lm")
+
+# Checking for Equal Error Variance
+#ggplot(data = m_result_3, aes(x=Predicted, y=m_error_3))+geom_point()
+plot(pharma_3_model_2, which=1)
+
+# Checking for Normality of Errors
+#qqnorm(m_result_3$m_error_3)
+#qqline(m_result_3$m_error_3)
+plot(pharma_3_model_2, which=2)
+```

@@ -1,0 +1,369 @@
+---
+title: "R : Module 7 : Decision Tree"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 7 : Assignment 1-6
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('rpart')
+```
+
+### (A) City-Temperature Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+city_1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Checking for NA values
+sum(is.na(city_1))
+
+# Removing "State" column as it is not needed
+city_1 <- within(city_1, rm(State))
+
+# Checking structure of data-set
+str(city_1)
+
+# Checking unique values in Year column
+unique(city_1$Year)
+
+# Replacing unique values "201" and "200" from Year column to "2001" and "2000" respectively 
+for(i in 1:nrow(city_1)){
+  if(city_1$Year[i]==200){
+    city_1$Year[i]=2000
+  }
+  else if(city_1$Year[i]==201){
+    city_1$Year[i]=2001
+  }
+}
+
+# Converting appropriate variables to factor-type 
+as.factor(city_1$Region) -> city_1$Region
+as.factor(city_1$Country) -> city_1$Country
+as.factor(city_1$City) -> city_1$City
+as.factor(city_1$Year) -> city_1$Year
+```
+
+#### Splitting the data-set into 70:30 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(city_1$AvgTemperature, SplitRatio=0.70) -> city_1_split_tag
+subset(city_1, city_1_split_tag==T) -> city_1_train
+subset(city_1, city_1_split_tag==F) -> city_1_test
+```
+
+#### Decision-Tree Model for city-temperature data-set
+
+```{r}
+# Building Model
+city_tree1 <- rpart(Region ~ AvgTemperature, data = city_1_train, method = "class")
+
+# Checking misclassification error rate and summary of model
+summary(city_tree1)
+```
+
+#### Predicting on test-data
+
+```{r}
+result_city_tree1 <- predict(city_tree1, newdata = city_1_test, type = "class")
+```
+
+#### Confusion-Matrix 
+
+```{r}
+confusionMatrix(city_1_test$Region, result_city_tree1)
+```
+
+### (B) Customer-Churn Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Decision-Tree Model for customer-churn data-set
+
+```{r}
+# Building Model
+churn_tree1 <- rpart(Churn ~ MonthlyCharges, data = churn_4_train, method = "class")
+
+# Checking misclassification error rate and summary of model
+summary(churn_tree1)
+```
+
+#### Predicting on test-data
+
+```{r}
+result_churn_tree1 <- predict(churn_tree1, newdata = churn_4_test, type = "class")
+```
+
+#### Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$Dependents, result_churn_tree1)
+```
+
+### (C) Pharmacovigilance Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+pharma_3 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Removing LocationID and PatientID columns as they are not needed
+pharma_3 <- within(pharma_3, rm(LocationID, PatientID))
+
+# Checking for NA values
+colSums(is.na(pharma_3))
+
+# Checking structure of the data-set
+str(pharma_3)
+
+# Converting appropriate variables to factor-type
+as.factor(pharma_3$Issues) -> pharma_3$Issues
+as.factor(pharma_3$DrugID) -> pharma_3$DrugID
+as.factor(pharma_3$Gender) -> pharma_3$Gender
+```
+
+#### Splitting the data-set into 75:25 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(pharma_3$DrugID, SplitRatio=0.75) -> pharma_3_split_tag
+subset(pharma_3, pharma_3_split_tag==T) -> pharma_3_train
+subset(pharma_3, pharma_3_split_tag==F) -> pharma_3_test
+```
+
+#### Decision-Tree Model for pharmacovigilance data-set
+
+```{r}
+# Building Model
+pharma_tree1 <- rpart(DrugID ~ Age, data = pharma_3_train, method = "class")
+
+# Checking misclassification error rate and summary of model
+summary(pharma_tree1)
+```
+
+#### Predicting on test-data
+
+```{r}
+result_pharma_tree1 <- predict(pharma_tree1, newdata = pharma_3_test, type = "class")
+```
+
+#### Confusion-Matrix 
+
+```{r}
+confusionMatrix(pharma_3_test$DrugID, result_pharma_tree1)
+```
+
+## Module 7: Case Study 1 - Decision Tree
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('rpart')
+```
+
+#### Task-1 : Building a decision tree model
+
+```{r}
+#a. Start off by dividing the 'customer_churn' data into train & test sets in 70:30 ratios. The split-criteria would be determined by the 'Dependents' column
+#b. Build a decision tree model on top of the 'train' set, where the dependent variable is 'Dependents' & the independent variable is 'Partner'. Store the result in 'mod_tree1'
+#c. Plot the tree and add text
+#d. Predict the values on the test set and store the result in 'result_tree1'
+#e. Build a confusion matrix for the actual values & the predicted values
+#f. Calculate the accuracy from the confusion matrix
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 70:30 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Dependents, SplitRatio=0.70) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_tests
+```
+
+#### Decision-Tree 
+
+```{r}
+# Building Model
+mod_tree1 <- rpart(Dependents ~ Partner, data = churn_4_train, method = "class")
+
+# Checking misclassification error rate and summary of model
+summary(mod_tree1)
+```
+
+#### Plotting Decision-Tree
+
+```{r}
+# Plotting the model
+plot(mod_tree1)
+
+# Giving labels to plotted decision-tree model
+text(mod_tree1, pretty = 1)
+```
+
+#### Predicting on test-data
+
+```{r}
+result_tree1 <- predict(mod_tree1, newdata = churn_4_test, type = "class")
+```
+ 
+#### Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$Dependents, result_tree1)
+```
+
+#### Task-2 : Building 2nd decision tree model on same 'train' & 'test' sets 
+
+```{r}
+#a. In this case the dependent variable is 'Dependents' & the independent variables are 'Partner' & 'InternetService'. Store the result in 'mod_tree2'
+#b. Plot the tree & add text
+#c. Predict the values on the test set & store the result in 'result_tree2'
+#d. Build a confusion matrix for the actual values & the predicted values
+#e. Calculate the accuracy from the confusion matrix
+```
+
+#### Decision-Tree
+
+```{r}
+# Building Model
+mod_tree2 <- rpart(Dependents ~ Partner +InternetService, data = churn_4_train, method = "class")
+
+# Checking misclassification error rate and summary of model
+summary(mod_tree2)
+```
+
+#### Plotting Decision-Tree
+
+```{r}
+plot(mod_tree2)
+
+# Giving labels to plotted decision-tree model
+text(mod_tree2, pretty = 1)
+```
+
+#### Predicting on test-data
+
+```{r}
+result_tree2 <- predict(mod_tree2, newdata = churn_4_test, type = "class")
+```
+
+#### Confusion-Matrix 
+
+```{r}
+confusionMatrix(churn_4_test$Dependents, result_tree2)
+```

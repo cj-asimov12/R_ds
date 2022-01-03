@@ -1,0 +1,160 @@
+---
+title: "R : Project 5 : Loan Approval Prediction"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('e1071')
+library('caret')
+library('caTools')
+```
+
+### Loading the data-set
+
+```{r}
+loan <- read.csv("/home/carb0n/Desktop/r/d/p5/customer_loan.csv",stringsAsFactors = TRUE)
+```
+
+### Preparing the data
+
+#### Looking at the structure of data-set
+
+```{r}
+str(loan)
+```
+
+#### Checking for null values in data-set
+
+```{r}
+sum(is.na(loan))
+```
+
+#### Adding new column "dti"
+
+```{r}
+loan <- loan %>% mutate(dti = debts/income)
+```
+
+#### Adding new column "loan_decision_status"
+
+```{r}
+loan <- loan %>% mutate(loan_decision_status = if_else(loan_decision_type == "Denied", 0, 1))
+```
+
+#### Converting column "loan_decision_status" to factor type
+
+```{r}
+loan$loan_decision_status <- as.factor(loan$loan_decision_status)
+```
+
+#### Creating new data-frame using selected columns
+
+```{r}
+customer_loan_refined <- loan %>% select(3,4,6,7,8,11,13,14)
+```
+
+#### Converting appropriate variables to numeric type
+
+```{r}
+customer_loan_refined$gender <- as.numeric(customer_loan_refined$gender)
+customer_loan_refined$marital_status <- as.numeric(customer_loan_refined$marital_status)
+customer_loan_refined$occupation <- as.numeric(customer_loan_refined$occupation)
+customer_loan_refined$loan_type <- as.numeric(customer_loan_refined$loan_type)
+```
+
+### Splitting the data-set
+
+#### Creating train and test sets
+
+```{r}
+set.seed(1)
+split_tag <- sample.split(customer_loan_refined$loan_decision_status, SplitRatio = 0.7)
+train_data <- subset(customer_loan_refined,split_tag==TRUE)
+test_data <- subset(customer_loan_refined,split_tag==FALSE)
+```
+
+### Feature Scaling
+
+```{r}
+# Scaling features from train-data
+train_scale <- scale(train_data[,1:7])
+
+# Scaling features from test-data
+test_scale <- scale(test_data[,1:7])
+```
+
+## PCA (Principal Component Analysis)
+
+### (1) PCA (On Train-Data)
+
+#### Performing Principal Component Analysis (PCA) on train-data
+
+```{r}
+train_pca <- prcomp(train_data[,c(1:7)], center = TRUE, scale. = TRUE)
+```
+
+#### Checking summary of PCA performed on train-data
+
+```{r}
+summary(train_pca)
+```
+
+##### Based on summary analysis, PC-6 and PC-7 are of higher importance in train-data.
+
+### (2) PCA (On Test-Data)
+
+#### Performing PCA on test-data
+
+```{r}
+test_pca <- prcomp(test_data[,c(1:7)], center = TRUE, scale. = TRUE)
+```
+
+#### Checking summary of PCA performed on test-data
+
+```{r}
+summary(test_pca)
+```
+
+##### Based on summary analysis, PC-6 and PC-7 are of higher importance in test-data.
+
+### Naive-Bayes - Model Building, Prediction, Confusion-Matrix And Evaluation
+
+#### Building Naive Bayes Model
+
+```{r}
+classifier_loan <- naiveBayes(loan_decision_status ~ ., data = train_data)
+```
+
+#### Predicting on test data-set
+
+```{r}
+classifier_loan_pred <- predict(classifier_loan, newdata = test_data)
+```
+
+#### Building Confusion Matrix
+
+```{r}
+cm <- table(test_data$loan_decision_status, classifier_loan_pred)
+```
+
+#### Model Evaluation
+
+```{r}
+confusionMatrix(cm)
+```

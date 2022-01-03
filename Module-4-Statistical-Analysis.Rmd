@@ -1,0 +1,143 @@
+---
+title: "R : Module 4 : Statistical Analysis"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Module 4 : Assignment 1 - IQR
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1.Calculate the IQR (Interquartile Range) for the following columns of the placement data-set:
+
+# a.hsc_p
+IQR(placement1$hsc_p)
+
+# b.ssc_p
+IQR(placement1$ssc_p)
+
+# c.degree_p
+IQR(placement1$degree_p)
+
+# d.mba_p
+IQR(placement1$mba_p)
+
+# e.etest_p
+IQR(placement1$etest_p)
+
+
+# 2.Calculate the IQR (Interquartile Range) for the following columns of the customer churn data-set:
+
+# a.TotalCharges
+IQR(customer_churn$TotalCharges, na.rm=T)
+
+# b.MonthlyCharges
+IQR(customer_churn$MonthlyCharges)
+
+# c.Tenure
+IQR(customer_churn$tenure)
+
+
+# 3.Calculate the IQR (Interquartile Range) for the following columns of the pharmacovigilance data-set:
+
+# a.Age
+IQR(pharma1$Age)
+
+# b.PatientID
+IQR(pharma1$PatientID)
+```
+
+### Module 4 : Assignment 2 - Calculating Variability and Spread
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1.Calculate the following for the 'tenure' column of customer churn data-set:
+
+# a.Mean
+mean(customer_churn$tenure)
+
+# b.Median
+median(customer_churn$tenure)
+
+# c.Range
+range(customer_churn$tenure)
+
+# d.IQR
+IQR(customer_churn$tenure)
+
+# e.Variance
+var(customer_churn$tenure)
+
+# f.Standard Deviation
+sd(customer_churn$tenure)
+
+
+# 2.Calculate the following for the 'ssc_p'column of student placement data-set:
+
+# a.Mean
+mean(placement1$ssc_p)
+
+# b.Median
+median(placement1$ssc_p)
+
+# c.Range
+range(placement1$ssc_p)
+
+# d.IQR
+IQR(placement1$ssc_p)
+
+# e.Variance
+var(placement1$ssc_p)
+
+# f.Standard Deviation
+sd(placement1$ssc_p)
+
+
+# 3.Calculate the following for the 'age' column of pharmacovigilance data-set:
+
+# a.Mean
+mean(pharma1$Age)
+
+# b.Median
+median(pharma1$Age)
+
+# c.Range
+range(pharma1$Age)
+
+# d.IQR
+IQR(pharma1$Age)
+
+# e.Variance
+var(pharma1$Age)
+
+# f.Standard Deviation 
+sd(pharma1$Age)
+```

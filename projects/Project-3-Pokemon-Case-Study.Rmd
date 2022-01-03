@@ -1,0 +1,188 @@
+---
+title: "R : Project 3 : Pokemon Case Study"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Loading required packages 
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+library('rpart')
+```
+
+### Loading the data-set
+
+```{r}
+pokemon <- read.csv("/home/carb0n/Desktop/r/d/p3/Pokemon.csv")
+```
+
+### Preparing the data
+
+```{r}
+# Checking structure of the data-set
+str(pokemon)
+
+# Removing unnecessary columns 
+pokemon <- pokemon[,-1]
+
+# Renaming columns
+pokemon <- pokemon %>% rename("Primary_Type"=Type.1,"Secondary_Type"=Type.2,"Health_Points"=HP, 
+                              "Special_Attack"=Sp..Atk,"Special_Defence"=Sp..Def)
+
+# Converting appropriate variables to factor-type
+pokemon$Legendary <- as.factor(pokemon$Legendary)
+```
+
+### Exploring the data
+
+#### Looking at different primary types
+
+```{r}
+table(pokemon$Primary_Type)
+```
+
+#### Looking at different secondary types
+
+```{r}
+table(pokemon$Secondary_Type)
+```
+
+#### Selecting "Grass" pokemon with "Poison" secondary type and maximum speed
+
+```{r}
+Grass_Pokemon <- pokemon %>% filter(Primary_Type=="Grass",Secondary_Type=="Poison") %>% top_n(1,Speed)
+Grass_Pokemon
+```
+
+#### Selecting "Water" pokemon with "Flying" secondary type and maximum speed
+
+```{r}
+Water_Pokemon <- pokemon %>% filter(Primary_Type=="Water",Secondary_Type=="Flying") %>% top_n(1,Defense)
+Water_Pokemon
+```
+
+#### Selecting "Water" pokemon with "Flying" secondary type and maximum speed
+
+```{r}
+Fire_Pokemon <- pokemon %>% filter(Primary_Type=="Fire",Secondary_Type=="Psychic") %>% top_n(1,Attack)
+Fire_Pokemon
+```
+
+#### Creating data-frame with selected pokemon for each type
+
+```{r}
+Selected_Pokemon <- rbind(Grass_Pokemon,Water_Pokemon,Fire_Pokemon) 
+Selected_Pokemon
+```
+
+## (A) Linear Model
+
+### Splitting the data-set into train and test sets
+
+```{r}
+set.seed(1)
+split_tag <- sample.split(pokemon$Attack,SplitRatio = 0.65) 
+train <- subset(pokemon,split_tag==T)
+test <- subset(pokemon,split_tag==F)
+```
+
+### Model Building And Prediction
+
+#### Building Linear Model
+
+```{r}
+model_1 <- lm(Attack~Defense,data=train)
+summary(model_1)
+```
+
+#### Predicting the model for test data-set
+
+```{r}
+predict_1 <- predict(model_1,newdata=test)
+head(predict_1)
+```
+
+#### Storing predicted values and actual values in a dataframe
+
+```{r}
+final_data <- cbind(Actual=test$Attack,Predicted=predict_1)
+final_data <- as.data.frame(final_data)
+range(final_data)
+head(final_data)
+```
+
+### Accuracy And Error
+
+#### Calculating error
+```{r}
+error <- (final_data$Actual-final_data$Predicted)
+final_data <- cbind(final_data,error)
+head(final_data)
+```
+
+#### Finding RMSE (Root-Mean-Squared Error) 
+
+```{r}
+sqrt(mean(final_data$error^2))
+```
+
+## (B) Classification-Tree Model
+
+### Splitting the data-set
+
+```{r}
+set.seed(1)
+split_tag <- sample.split(pokemon$Legendary,SplitRatio = 0.65)
+subset(pokemon,split_tag==T) -> train
+subset(pokemon,split_tag==F) -> test
+
+nrow(train)
+nrow(test)
+```
+
+### Preparing the data
+
+```{r}
+# Converting "Legendary" column to factor type 
+test$Legendary <- as.factor(test$Legendary)
+
+# Converting "Name" column to factor type with same levels as train data
+test$Name <- factor(test$Name, levels = levels(train$Name))
+```
+
+### Model Building And Prediction
+
+#### Building Classification Tree Model
+
+```{r}
+model_2 <- rpart(Legendary~.,data=train)
+summary(model_2)
+```
+
+#### Predicting on test-data
+
+```{r}
+predict_2 <- predict(model_2,newdata=test,type="class")
+head(predict_2)
+```
+
+#### Confusion-Matrix And Accuracy
+
+```{r}
+confusionMatrix(test$Legendary,predict_2)
+```

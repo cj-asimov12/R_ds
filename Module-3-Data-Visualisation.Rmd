@@ -1,0 +1,710 @@
+---
+title: "R : Module 3 : Data Visualisation"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 3 : Assignment 1 - AES Attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Create the following bar-plots where:
+
+# a. PhoneService column is assigned to the x aesthetic.
+ggplot(data=customer_churn,aes(x=PhoneService))+geom_bar()
+
+# b. Gender column is assigned to the x aesthetic.
+ggplot(data=customer_churn,aes(x=gender))+geom_bar()
+
+# c. InternetService is assigned to x aesthetic and MonthlyCharges to aesthetic.
+ggplot(data=customer_churn,aes(x=InternetService))+
+  geom_bar(aes(MonthlyCharges))
+
+# d. MonthlyCharges is assigned to x aesthetic and SeniorCitizen to aesthetic.
+ggplot(data=customer_churn,aes(x=MonthlyCharges))+
+  geom_bar(aes(SeniorCitizen))
+
+# e. TotalCharges is assigned to x aesthetic and Tenure to aesthetic.
+ggplot(data=customer_churn,aes(x=TotalCharges))+
+  geom_bar(aes(tenure))
+
+# f. StreamingTV is assigned to x aesthetic and SeniorCitizen to aesthetic.
+ggplot(data=customer_churn,aes(x=StreamingTV))+
+  geom_bar(aes(SeniorCitizen))
+
+# g. Dependents is assigned to x aesthetic and Partner to aesthetic. 
+ggplot(data=customer_churn,aes(x=Dependents))+
+  geom_bar(aes(Partner))
+```
+
+## Module 3 : Assignment 2 - bins attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1. Create a histogram for 'Age' column using pharmacovigilance dataset:
+# a. Set number of bins to 100.
+# b. Assign as color 'azure' to the histogram.
+# c. Assign a color 'white' to the 'fill' attribute in geom_histogram function.
+ggplot(data=pharma1,aes(x=Age))+
+  geom_histogram(bins=100,col='azure',fill='white')
+
+# 2. Create a histogram for 'Patient ID' using pharmacovigilance dataset:
+# a. Assign a color 'wheat3' to the plot.
+# b. Set number of bins to 50.
+# c. Assign a color 'black' to the 'fill' attribute in geom_histogram function.
+ggplot(data=pharma1,aes(x=PatientID))+
+  geom_histogram(col='wheat3',bins=50,fill='black')
+
+# 3. Create a histogram using customer churn dataset:
+# a. Assign 'MonthlyCharges' column to the x-axis.
+# b. Set the number of bins to 80.
+# c. Assign a color 'violet' to the bars.
+# d. Assign a color 'white' to the 'fill' attribute in geom_histogram function.
+ggplot(data=customer_churn,aes(x=MonthlyCharges))+
+  geom_histogram(bins=80,col='violet',fill='white')
+
+# 4. Create a histogram using customer churn data:
+# a. Assign 'tenure' column to the x-axis.
+# b. Set the number of bins to 50.
+# c. Assign a color 'white' to the bars.
+# d. Assign a color 'black' to the 'fill' attribute in geom_histogram function. 
+ggplot(data=customer_churn,aes(x=tenure))+
+  geom_histogram(bins=50,col='white',fill='black')
+```
+
+## Module 3 : Assignment 3 - col attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create the following bar-plot where:
+
+# a.'Gender' is assigned to x-axis, 'ssc_p' to y-axis, and map 'ssc_b' with col aesthetic.
+ggplot(data=placement1,aes(x=gender,y=ssc_p,col=ssc_b))+
+  geom_bar(stat='identity')
+
+# b.'ssc_b' is assigned to x-axis, 'hsc_s' to y-axis, and map 'degree_t' with col aesthetic.
+ggplot(data=placement1,aes(x=ssc_b,y=hsc_s,col=degree_t))+
+  geom_bar(stat='identity')
+
+# c.'Status' is assigned to x-axis, salary to y-axis, and map 'specialisation' with col aesthetic.
+ggplot(data=placement1,aes(x=status,y=salary,col=specialisation))+
+  geom_bar(stat='identity')
+
+# d.'Degree_t' is assigned to x-axis, 'etest_p' to y-axis, and map 'workex' with col aesthetic.
+ggplot(data=placement1,aes(x=degree_t,y=etest_p,col=workex))+
+  geom_bar(stat='identity')
+
+# e.'Hsc_s' is assigned to x-axis, 'hsc_b' to y-axis, and map gender with col aesthetic.
+ggplot(data=placement1,aes(x=hsc_s,y=hsc_b,col=gender))+
+  geom_bar(stat='identity')
+
+# f.'Hsc_s' is assigned to x-axis, 'etest_p' to y-axis, and map 'degree_t' with col aesthetic.
+ggplot(data=placement1,aes(x=hsc_s,y=etest_p,col=degree_t))+
+  geom_bar(stat='identity')
+```
+
+## Module 3 : Assignment 4 - facet_grid() 
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Build a histogram for the 'TotalCharges' column. Map 'gender' onto fill aesthetic.
+# a.Facet the plot w.r.t 'gender' column
+ggplot(data=customer_churn,aes(x=TotalCharges,fill=gender))+
+  geom_histogram()+facet_grid(~gender)
+
+# 2.Build a box-plot between 'tenure' & 'InternetService'.Map 'tenure' on the y-axis & 'InternetService' on the x-axis. Map 'Contract' to the fill aesthetic
+# a.Facet the plot w.r.t 'Contract' column
+ggplot(data=customer_churn,aes(y=tenure,x=InternetService,fill=Contract))+
+  geom_boxplot()+facet_grid(~Contract)
+
+# 3.Build a scatter-plot between 'etest_p' & 'mba_p'.Map 'etest_p' on the y-axis & 'mba_p' on the x-axis. Map 'degree_t' onto col aesthetic
+# a.Facet the plot w.r.t 'degree_t' column
+ggplot(data=placement1,aes(y=etest_p,x=mba_p,fill=degree_t))+
+  geom_boxplot()+facet_grid(~degree_t)
+```
+
+## Module 3 : Assignment 5 - fill attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Build a bar-plot:
+
+# a.Assign 'etest_p' column to x-axis
+ggplot(data=placement1,aes(x=etest_p))+geom_bar()
+
+# b.Assign 'specialisation'column to x-axis
+ggplot(data=placement1,aes(x=specialisation))+geom_bar()
+
+# c.Assign 'workex' to the fill attribute
+ggplot(data=placement1,aes(x=specialisation,fill=workex))+geom_bar()
+
+
+# 2.Build a bar-plot for the 'degree_t' column:
+# a.Assign the fill color to be 'orange'
+# b.Assign the boundary color to be 'peru'
+ggplot(data=placement1,aes(x=degree_t))+
+  geom_bar(fill='orange',col='peru')
+
+
+# 3.Build a bar-plot for the 'hsc_s' column assigned to x-axis and then:
+
+# a.Assign 'hsc_b' to the fill aesthetic
+ggplot(data=placement1,aes(x=hsc_s,fill=hsc_b))+geom_bar()
+
+# b.Assign 'degree_t' to the fill aesthetic
+ggplot(data=placement1,aes(x=hsc_s,fill=degree_t))+geom_bar()
+
+# c.Change the position of bars to 'identity'
+ggplot(data=placement1,aes(x=hsc_s,fill=degree_t))+
+  geom_bar(position='identity')
+```
+
+## Module 3 : Assignment 6 - geom_bar attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1.Build a bar-plot:
+# a.Assign 'LocationID' column to x-axis.
+# b.Assign 'Issues' to the fill attribute.
+# c.Set title to 'Location ID Plot'
+ggplot(data=pharma1,aes(x=LocationID,fill=Issues))+
+  geom_bar()+ggtitle('Location ID Plot')
+
+# 2.Build a bar-plot for the 'DrugID' column:
+# a.Assign the fill color to be 'orange'
+# b.Assign the boundary color to be 'peru'
+# c.Set title to 'Drug ID Plot'
+ggplot(data=pharma1,aes(x=DrugID))+
+  geom_bar(fill='orange',col='peru')+ggtitle('Drug ID Plot')
+
+# 3.Build a bar-plot for the 'Gender' column assigned to x-axis and then:
+# a.Assign 'DrugID' to the fill aesthetic
+# b.Assign 'Issues' to the fill aesthetic
+# c.Change the position of bars to 'identity'
+# d.Set title to 'Gender Plot'
+ggplot(data=pharma1,aes(x=Gender,fill=Issues))+
+  geom_bar(position='identity')+ggtitle('Gender Plot')
+```
+
+## Module 3 : Assignment 7 - geom_point attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create a scatter-plot:
+
+# a.Assign 'hsc_p' column to x-axis and 'ssc_p' column to y-axis.
+ggplot(data=placement1,aes(x=hsc_p, y=ssc_p))+geom_point()
+
+# b.Map 'gender' to the col aesthetic.
+ggplot(data=placement1,aes(x=hsc_p, y=ssc_p,col=gender))+geom_point()
+
+# c.Map 'workex' to the col aesthetic.
+ggplot(data=placement1,aes(x=hsc_p, y=ssc_p,col=workex))+geom_point()
+
+# d.Map 'status' to the col aesthetic.
+ggplot(data=placement1,aes(x=hsc_p, y=ssc_p,col=status))+geom_point()
+
+# e.Add a title to the plot as 'Comparing HSC & SSC Percentage'.
+ggplot(data=placement1,aes(x=hsc_p, y=ssc_p,col=status))+
+  geom_point()+ggtitle('Comparing HSC & SSC Percentage')
+
+
+# 2.Create a scatter-plot:
+
+# a.Assign 'degree_p' column to the x-axis and 'mba_p' to the y-axis.
+ggplot(data=placement1,aes(x=degree_p, y=mba_p))+geom_point()
+
+# b.Use 'col' as an aesthetic and assign it the column 'status'.
+ggplot(data=placement1,aes(x=degree_p, y=mba_p, col=status))+geom_point()
+
+# c.Use 'col' as an aesthetic and assign it the column 'specialisation'.
+ggplot(data=placement1,aes(x=degree_p, y=mba_p, col=specialisation))+geom_point()
+
+# d.Add a title to the plot as 'Understanding Degree & MBA Percentage'.
+ggplot(data=placement1,aes(x=degree_p, y=mba_p, col=specialisation))+
+  geom_point()+ggtitle('Understanding Degree & MBA Percentage')
+
+
+# 3.Create a scatter-plot:
+
+# a.Assign 'etest_p' column to the x-axis and 'salary' to the y-axis.
+ggplot(data=placement1,aes(x=etest_p, y=salary))+geom_point()
+
+# b.Use 'col' as an aesthetic and assign it the column 'workex'.
+ggplot(data=placement1,aes(x=etest_p, y=salary, col=workex))+geom_point()
+
+# c.Use 'col' as an aesthetic and assign it the column 'gender'.
+ggplot(data=placement1,aes(x=etest_p, y=salary, col=gender))+geom_point()
+
+# d.Add a title to the plot as 'E-test & Salary'
+ggplot(data=placement1,aes(x=etest_p, y=salary, col=gender))+
+  geom_point()+ggtitle('E-test & Salary')
+```
+
+## Module 3 : Assignment 8 - theme()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Build a bar-plot for the 'specialisation' column.Give it a fill color of 'skyblue'
+# a.Give the panel a background color of 'cornsilk4'.
+# b.Give the plot a background color of 'lightgreen'.
+ggplot(data=placement1,aes(x=specialisation))+geom_bar(fill='skyblue')+
+  theme(panel.background = element_rect(fill='lightgreen'))
+
+
+# 2.Build a scatter-plot between 'hsc_p' & 'ssc_p'.Map 'hsc_p' on the y-axis & 'ssc_p' on the x-axis. Assign a color of 'lightgreen' to the points.
+# a.Add a title to the plot 'HSC Percent vs SSC Percent'.
+# b.Give the panel a background color of 'skyblue'.
+# c.Give the plot a background color of 'beige'.
+# d.Center align the title.
+ggplot(data=placement1,aes(x=ssc_p,y=hsc_p))+geom_point(col='lightgreen')+
+  ggtitle('HSC Percent vs SSC Percent')+
+  theme(panel.background = element_rect(fill='beige'),plot.title = element_text(hjust = 0.5))
+```
+
+## Module 3 : Assignment 9 - xlab and ylab attribute
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create a plot using plot() function for hsc_s column, assign a color 'orange', and label x-axis as 'Higher Secondary Subjects'.
+plot(as.factor(placement1$hsc_s),col='orange',xlab='Higher Secondary Subjects')
+
+
+# 2.Create a plot using plot() function for 'degree_t' column:
+# a.Assign a color 'palegreen4'
+# b.Label x-axis as 'Percentage in Graduation'
+# c.Label y-axis as 'Number of Students'
+plot(as.factor(placement1$degree_t),col='palegreen4',xlab='Percentage in Graduation',ylab='Number of Students')
+
+
+# 3.Create a plot using plot() function for 'specialisation' column & Assign a color 'wheat3':
+# a.Label x-axis as 'Specialization Field'
+# b.Label y-axis as 'Number of Students'
+# c.Give a heading using 'main' attribute as 'Distribution of Specialization'
+plot(as.factor(placement1$specialisation),col='wheat3',xlab='Specialisation Field',ylab='Number of Students',main='Distribution of Specialization')
+```
+
+## Module 3 : Assignment 10 - geom_boxplot() 
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create a box-plot between 'etest_p' & 'workex'.Map 'etest_p' to the y-axis &   'workex' to the 'x-axis'
+# a.Assign it a fill color of 'wheat3'
+# b.Assign it a boundary color of 'snow3'
+# c.Give a title as 'E-test & Workex'
+ggplot(data=placement1,aes(x=workex, y=etest_p))+geom_boxplot(fill='wheat3',col='snow3')+ggtitle('E-test & Workex')
+
+
+# 2.Build a box-plot between 'etest_p' & 'gender'.Map 'etest_p' to the y-axis & 'gender' to the 'x-axis'
+
+# a.Assign 'degree_t' to the fill aesthetic
+ggplot(data=placement1,aes(x=gender, y=etest_p,fill=degree_t))+geom_boxplot()
+
+# b.Assign 'hsc_s' to the fill aesthetic
+ggplot(data=placement1,aes(x=gender, y=etest_p,fill=hsc_s))+geom_boxplot()
+
+# c.Give a title as 'E-test & Gender'
+ggplot(data=placement1,aes(x=gender, y=etest_p,fill=hsc_s))+geom_boxplot()+ggtitle('E-test & Gender')
+
+
+# 3.Build a box-plot between 'etest_p' & 'specialisation'
+ggplot(data=placement1,aes(x=specialisation, y=etest_p))+geom_boxplot()
+
+# a.Assign 'ssc_b' to the fill aesthetic
+ggplot(data=placement1,aes(x=specialisation, y=etest_p, fill=ssc_b))+geom_boxplot()
+
+# b.Assign 'hsc_b' to the fill aesthetic
+ggplot(data=placement1,aes(x=specialisation, y=etest_p, fill=hsc_b))+geom_boxplot()
+
+# c.Give a title as 'E-test & Specialization'
+ggplot(data=placement1,aes(x=specialisation, y=etest_p, fill=hsc_b))+geom_boxplot()+ggtitle('E-test & Specialisation')
+```
+
+## Module 3 : Assignment 11 - geom_histogram()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create a histogram for 'ssc_p' column:
+# a.Assign as color 'azure' to the histogram.
+# b.Set number of bins to 50.
+# c.Assign a color 'cornsilk4' to the 'fill' attribute in geom_histogram function.
+# d.Give it a title as 'SSC Percentage'
+ggplot(data=placement1,aes(x=ssc_p))+
+  geom_histogram(col='azure',bins=50,fill='cornsilk4')+ggtitle('SSC Percentage')
+
+# 2.Create a histogram for 'hsc_p':
+# a.Assign a color 'wheat3' to the plot.
+# b.Set number of bins to 50.
+# c.Assign a color 'black' to the 'fill' attribute in geom_histogram function.
+# d.Give it a title as 'HSC Percentage'
+ggplot(data=placement1,aes(x=hsc_p))+
+  geom_histogram(col='wheat3',bins=50,fill='black')+ggtitle('HSC Percentage')
+
+# 3.Create a histogram as per the following conditions:
+# a.Assign 'degree_p' column to the x-axis.
+# b.Set the number of bins to 80.
+# c.Assign a color 'violet' to the bars.
+# d.Assign a color 'white' to the 'fill' attribute in geom_histogram function.
+# e.Give it a title as 'Degree Percentage'
+ggplot(data=placement1,aes(x=degree_p))+
+  geom_histogram(bins=80,col='violet',fill='white')+ggtitle('Degree Percentage')
+
+# 4.Create a histogram as per the following condition:
+# a.Assign 'etest_p' column to the x-axis.
+# b.Set the number of bins to 100.
+# c.Assign a color 'white' to the bars.
+# d.Assign a color 'black' to the 'fill' attribute in geom_histogram function.
+# e.Give it a title as 'E-test Percentage'
+ggplot(data=placement1,aes(x=etest_p))+
+  geom_histogram(bins=100,col='white',fill='black')+ggtitle('E-test Percentage')
+```
+
+## Module 3 : Assignment 12 - labs()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create bar-plot as per the following condition:
+# a.Assign 'degree_t' to the x-axis.
+# b.Give title of the plot as 'Degree Plot'.
+# c.Assign a color 'yellowgreen'.
+ggplot(data=placement1,aes(x=degree_t))+
+  geom_bar(fill='yellowgreen')+labs(title='Degree Plot')
+
+# 2.Create bar-plot as per the following condition:
+# a.Assign 'ssc_b' to the x-axis.
+# b.Give title of the plot as 'SSC Plot'.
+# c.Assign a color 'beige'.
+ggplot(data=placement1,aes(x=ssc_b))+
+  geom_bar(fill='beige')+labs(title='SSC Plot')
+
+# 3.Create bar-plot as per the following condition:
+# a.Assign 'hsc_b' to the x-axis.
+# b.Give title of the plot as 'HSC Plot'.
+# c.Assign a color 'cornsilk4'.
+ggplot(data=placement1,aes(x=hsc_b))+
+  geom_bar(fill='cornsilk4')+labs(title='HSC Plot')
+
+# 4.Create bar-plot as per the following condition:
+# a.Assign 'specialisation' to the x-axis.
+# b.Give title of the plot as 'Specialization Plot'.
+# c.Assign a color 'pink'.
+ggplot(data=placement1,aes(x=specialisation))+
+  geom_bar(fill='pink')+labs(title='Specialization Plot')
+```
+
+## Module 3 : Assignment 13 - plot()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading required packages
+library(ggplot2)
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Create a plot to understand the distribution of degree_t column.
+plot(as.factor(placement1$degree_t))
+
+# 2.Create a plot to understand the distribution of hsc_s column.
+plot(as.factor(placement1$hsc_s))
+
+# 3.Create a plot for specialization column and give a heading as 'Specialization of Candidate'.
+plot(as.factor(placement1$specialisation),main='Specialization of Candidate')
+
+# 4.Create a plot using ssc_b, give it a color of 'aquamarine4', and give a heading as 'Type of Board'. 
+plot(as.factor(placement1$ssc_b),col='aquamarine4',main='Type of Board')
+```
+
+## Module 3 : Assignment 14 - plotly package
+
+### Loading required packages
+
+```{r}
+library(plotly)
+```
+
+```{r}
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1.Build a histogram for the 'Age' column.
+plot_ly(data=pharma1,x=~Age,type='histogram')
+
+# a.Color should be determined by 'Issues' column
+plot_ly(data=pharma1,x=~Age,type='histogram',color=~Issues)
+
+# b.Color should be determined by 'Gender' column
+plot_ly(data=pharma1,x=~Age,type='histogram',color=~Gender)
+
+# 2.Create a scatter plot between 'Age' & 'Gender' as per the following condition:
+# a.Map 'Age' on the y-axis
+# b.Map 'Gender' on the 'x-axis'
+# c.Color should be determined by 'Issues' column
+plot_ly(data=pharma1, y=~Age, x=~Gender, type='scatter', mode='markers', color=~Issues)
+
+# 3.Create a box-plot between 'DrugID' & 'Age'.
+# a.Map 'DrugID' on the x-axis
+# b.Map 'Age' on the y-axis
+# c.Color should be determined by 'Gender' column 
+plot_ly(data=pharma1, y=~Age, x=~DrugID, type='box', color=~Gender)
+```
+
+## Module 3 : Case Study 1 - base graphics
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1.Create a bar-plot for the 'PaymentMethod' column.
+as.factor(customer_churn$PaymentMethod) -> customer_churn$PaymentMethod
+plot(customer_churn$PaymentMethod)
+
+# a.Assign the color 'burlywood4'
+plot(customer_churn$PaymentMethod,col='burlywood4')
+
+# b.Assign the x-axis label to be "Payment Method"
+plot(customer_churn$PaymentMethod,col='burlywood4', xlab='Payment Method')
+
+# c.Assign the title to be "Bar-Plot for Payment Method"
+plot(customer_churn$PaymentMethod,col='burlywood4', xlab='Payment Method', main='Bar-Plot for Payment Method')
+
+# 2.Create a histogram for the 'TotalCharges' column
+# a.Assign the color 'forestgreen'
+# b.Assign the x-axis label to be "Total Charges"
+# c.Assign the title to be "Histogram for Total Charges"
+hist(customer_churn$TotalCharges,col='forestgreen',xlab='Total Charges',main='Histogram for Total Charges')
+
+# 3.Create a density plot for the 'TotalCharges' column
+# a.Assign the color 'maroon'
+# b.Assign the x-axis label to be "Total Charges"
+# c.Assign the title to be "Density plot for Total Charges"
+plot(density(customer_churn$TotalCharges,na.rm=T),col='maroon',xlab ='Total Charges',main='Density plot for Total Charges')
+```
+
+## Module 3 : Case Study 2 - geom_bar()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1.Build a bar-plot for the 'PhoneService' column
+# a.Assign the fill color to be 'pink'
+# b.Assign the boundary color to be 'peru'
+ggplot(data = customer_churn,aes(x=PhoneService))+geom_bar(fill='pink',col='peru')
+
+
+# 2.Build a bar-plot for the 'InternetService' column
+
+# a.Assign 'InternetService' to the fill aesthetic
+ggplot(data = customer_churn,aes(x=InternetService,fill=InternetService))+geom_bar()
+
+# b.Assign 'Contract' to the fill aesthetic
+ggplot(data = customer_churn,aes(x=InternetService,fill=Contract))+geom_bar()
+
+# c.Change the position of bars to 'identity'
+ggplot(data = customer_churn,aes(x=InternetService,fill=Contract))+geom_bar(position='identity')
+
+
+# 3.Build a bar-plot for 'TechSupport' column
+# a.Assign 'Churn' to the fill aesthetic 
+ggplot(data = customer_churn,aes(x=TechSupport,fill=Churn))+geom_bar()
+```
+
+## Module 3 : Case Study 3 - geom_point()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1.Build a scatter-plot between 'TotalCharges' & 'tenure'.Map 'TotalCharges' to the y-axis & 'tenure' to the 'x-axis'
+# a.Assign it the color 'wheat3'
+# b.Use 'col' as an aesthetic and Map 'PaymentMethod' to col
+ggplot(data=customer_churn,aes(x=tenure,y=TotalCharges,col=PaymentMethod))+geom_point()
+
+# c.Use 'col' as an aesthetic and Map 'gender' to col
+ggplot(data=customer_churn,aes(x=tenure,y=TotalCharges,col=gender))+geom_point()
+
+# d.Map 'Dependents' to both 'col' & 'shape' aesthetics
+ggplot(data=customer_churn,aes(x=tenure,y=TotalCharges,col=Dependents,shape=Dependents))+geom_point()
+
+
+# 2.Build a scatter-plot between 'tenure' & 'MonthlyCharges'.Map 'tenure' to the y-axis & 'MonthlyCharges' to the 'x-axis'
+# a.Assign it the color 'yellowgreen'
+# b.Use 'col' as an aesthetic and Map 'InternetService' to col
+ggplot(data=customer_churn,aes(x=MonthlyCharges,y=tenure,col=InternetService))+geom_point()
+
+# c.Use 'col' as an aesthetic and Map 'Contract' to col 
+ggplot(data=customer_churn,aes(x=MonthlyCharges,y=tenure,col=Contract))+geom_point()
+```
+
+## Module 3 : Case Study 4 - geom_histogram()
+
+### Loading required packages
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1.Build a histogram for the 'tenure' column
+# a.Assign the fill color to be 'mediumspringgreen'
+# b.Assign the boundary color to be 'azure'
+# c.Change the number of bins to be 100
+ggplot(data=customer_churn,aes(x=tenure))+geom_histogram(fill='mediumspringgreen',color='azure',bins=100)
+
+# 2.Build histogram for the 'MonthlyCharges' column
+
+# a.Assign 'PaymentMethod' to the fill aesthetic
+ggplot(data=customer_churn,aes(x=MonthlyCharges,fill=PaymentMethod))+geom_histogram()
+
+# b.Assign 'OnlineBackup' to the fill aesthetic
+ggplot(data=customer_churn,aes(x=MonthlyCharges,fill=OnlineBackup))+geom_histogram()
+
+# 3.Build histogram for the 'TotalCharges' column
+
+# a.Assign 'gender' to the fill aesthetic
+ggplot(data=customer_churn,aes(x=TotalCharges,fill=gender))+geom_histogram()
+
+# b.Assign 'InternetService' to the fill aesthetic 
+ggplot(data=customer_churn,aes(x=TotalCharges,fill=InternetService))+geom_histogram()
+```

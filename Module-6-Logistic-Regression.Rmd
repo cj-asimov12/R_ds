@@ -1,0 +1,460 @@
+---
+title: "R : Module 6 : Logistic Regression"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 6 : Assignment 1-6
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+```
+
+### (A) City-Temperature Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+city_1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Checking for NA values
+sum(is.na(city_1))
+
+# Removing "State" column as it is not needed
+city_1 <- within(city_1, rm(State))
+
+# Checking structure of data-set
+str(city_1)
+
+# Checking unique values in Year column
+unique(city_1$Year)
+
+# Replacing unique values "201" and "200" from Year column to "2001" and "2000" respectively 
+for(i in 1:nrow(city_1)){
+  if(city_1$Year[i]==200){
+    city_1$Year[i]=2000
+  }
+  else if(city_1$Year[i]==201){
+    city_1$Year[i]=2001
+  }
+}
+
+# Converting appropriate variables to factor-type 
+as.factor(city_1$Region) -> city_1$Region
+as.factor(city_1$Country) -> city_1$Country
+as.factor(city_1$City) -> city_1$City
+as.factor(city_1$Year) -> city_1$Year
+```
+
+#### Splitting the data-set into 70:30 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(city_1$AvgTemperature, SplitRatio=0.70) -> city_1_split_tag
+subset(city_1, city_1_split_tag==T) -> city_1_train
+subset(city_1, city_1_split_tag==F) -> city_1_test
+```
+
+#### Simple Logistic Regression Model for city-temperature data-set
+
+```{r}
+# Building Model
+glm(Region~AvgTemperature, data = city_1_train, family = 'binomial') -> city_1_model_1
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(city_1_model_1)
+```
+
+#### Multiple Logistic Regression Model for city-temperature data-set
+
+```{r}
+glm(Region~AvgTemperature +Day +Month +Year, data = city_1_train, family = 'binomial') -> city_1_model_2
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(city_1_model_2)
+```
+
+### (B) Customer-Churn Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Simple Logistic Regression Model for customer-churn data-set
+
+```{r}
+# Building Model
+glm(Churn~MonthlyCharges, data = churn_4_train, family = 'binomial') -> churn_4_model_1
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(churn_4_model_1)
+```
+
+#### Multiple Logistic Regression Model for customer-churn data-set
+
+```{r}
+# Building Model
+glm(Churn~MonthlyCharges +tenure +StreamingTV +MonthlyCharges +TotalCharges, data = churn_4_train, family = 'binomial') -> churn_4_model_2
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(churn_4_model_2)
+```
+
+### (C) Pharmacovigilance Data-Set
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+pharma_3 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Removing LocationID and PatientID columns as they are not needed
+pharma_3 <- within(pharma_3, rm(LocationID))
+
+# Checking for NA values
+colSums(is.na(pharma_3))
+
+# Checking structure of the data-set
+str(pharma_3)
+
+# Converting appropriate variables to factor-type
+as.factor(pharma_3$Issues) -> pharma_3$Issues
+as.factor(pharma_3$DrugID) -> pharma_3$DrugID
+as.factor(pharma_3$Gender) -> pharma_3$Gender
+```
+
+#### Splitting the data-set into 75:25 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+
+sample.split(pharma_3$DrugID, SplitRatio=0.75) -> pharma_3_split_tag
+subset(pharma_3, pharma_3_split_tag==T) -> pharma_3_train
+subset(pharma_3, pharma_3_split_tag==F) -> pharma_3_test
+
+nrow(pharma_3_train)
+nrow(pharma_3_test)
+```
+
+#### Simple Logistic Regression Model for pharmacovigilance data-set
+
+```{r}
+# Building Model
+glm(DrugID~Age, data = pharma_3_train, family = 'binomial') -> pharma_3_model_1
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(pharma_3_model_1)
+```
+
+#### Multiple Logistic Regression Model for pharmacovigilance data-set
+
+```{r}
+# Building Model
+glm(DrugID~Age +Gender +PatientID, data = pharma_3_train, family = 'binomial') -> pharma_3_model_2
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(pharma_3_model_2)
+```
+
+### Module 6: Case Study 1 - Multiple Logistic Regression
+
+#### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('caret')
+```
+
+#### Task-1 : Build a multiple logistic regression model
+
+```{r}
+#a. Start off by dividing the data-set into 'train' & 'test' sets in 65:35 ratio, with the split-criteria being determined by 'gender' column.
+#b. Build a logistic regression model on the train set where the dependent variable is 'gender' & the independent variables are 'Dependents', 'InternetService' & 'Contract' & store the result in 'log_mod_multi'.
+#c. Predict the values on top of the test set & store the result in 'result_log_multi'.
+#d. Have a look at the range of 'result_log_multi' & build a confusion matrix where the threshold of predicted values is greater than '0.49'
+#e. Calculate the accuracy of the model from the confusion matrix.
+```
+
+####  Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Multiple Logistic Regression Model
+
+```{r}
+# Building Model
+glm(gender ~ Dependents +InternetService +Contract, data = churn_4_train, family = 'binomial') -> churn_4_model_2
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(churn_4_model_2)
+
+# Predicting for test data
+result_log_multi <- predict(churn_4_model_2, newdata = churn_4_test, type = 'response')
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(result_log_multi)
+
+# Checking range of the values for the model
+range(result_log_multi)
+```
+
+#### Creating confusion matrix with a threshold
+
+```{r}
+pv_model2 <- ifelse(result_log_multi>0.51, "Male", "Female")
+pv_model2_f <- as.factor(pv_model2)
+head(pv_model2_f)
+confusionMatrix(churn_4_test$gender,pv_model2_f)
+```
+
+#### Task-2 : Build second logistic regression model on the same 'train' & 'test' sets
+
+```{r}
+#a. In this case dependent variable is 'gender' & the independent variables are 'tenure', 'MonthlyCharges' & 'PaymentMethod
+#b. Predict the values on top of the test set & store the result in 'result_log_multi2'
+#c. Have a look at the range of 'result_log_multi2' & build a confusion matrix where the threshold of predicted values is greater than 0.49
+#d. Calculate the accuracy of the model from the confusion matrix
+```
+
+#### Multiple Logistic Regression Model
+
+```{r}
+# Building Model
+churn_4_model_4 <- glm(gender ~ tenure +MonthlyCharges +PaymentMethod, data = churn_4_train, family = "binomial")
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(churn_4_model_4)
+
+# Predicting for test data
+result_log_multi2 <- predict(churn_4_model_4, newdata = churn_4_test, type = "response")
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(result_log_multi2)
+
+
+# Checking range of the values for the model
+range(result_log_multi2)
+```
+
+#### Creating Confusion with a threshold
+
+```{r}
+pv_model3 <- ifelse(result_log_multi2>0.51, "Male", "Female")
+pv_model3_f <- as.factor(pv_model3)
+head(pv_model3_f)
+confusionMatrix(churn_4_test$gender,pv_model3_f)
+```
+
+## Module 6: Case Study 2 - ROC Curve
+
+### Loading required packages
+
+```{r}
+library('dplyr')
+library('caTools')
+library('ROCR')
+```
+
+#### Task-1 : Building a logistic regression model
+
+```{r}
+#a. Start off by dividing the data-set into 'train' & 'test' sets in 80:20 ratio, with the split criteria being determined by 'Churn' column
+#b. Build a logistic regression model on the train set where the dependent variable is 'Churn' & the independent variables are 'MonthlyCharges', 'tenure' & 'TechSupport' & store the result in 'log_mod_roc'
+#c. Predict the values on top of the test set & store the result in 'result_log_roc'
+#d. Use the performance () function from the ROCR package & build the 'Accuracy vs cutoff' plot i.e. Plot the 'ROC' curve
+#e. Find out the "area under the curve"
+```
+
+#### Preparing the data
+
+```{r}
+# Loading the data-set
+churn_4 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Checking structure of data-set
+str(churn_4)
+
+# Checking for NA values
+colSums(is.na(churn_4))
+
+# Removing "CustomerID" column as it is not needed
+churn_4 <- within(churn_4, rm(customerID))
+
+# Plotting box-plot for TotalCharges column to check for outliers
+boxplot(churn_4$TotalCharges)
+
+# Replacing NA values in TotalCharges column with mean value for TotalCharges column
+churn_4$TotalCharges[is.na(churn_4$TotalCharges)] <- mean(churn_4$TotalCharges, na.rm = TRUE)
+
+# Converting appropriate variables to factor-type 
+as.factor(churn_4$gender) -> churn_4$gender
+as.factor(churn_4$SeniorCitizen) -> churn_4$SeniorCitizen
+as.factor(churn_4$Partner) -> churn_4$Partner
+as.factor(churn_4$Dependents) -> churn_4$Dependents
+as.factor(churn_4$PhoneService) -> churn_4$PhoneService
+as.factor(churn_4$MultipleLines) -> churn_4$MultipleLines
+as.factor(churn_4$InternetService) -> churn_4$InternetService
+as.factor(churn_4$OnlineSecurity) -> churn_4$OnlineSecurity
+as.factor(churn_4$OnlineBackup) -> churn_4$OnlineBackup
+as.factor(churn_4$DeviceProtection) -> churn_4$DeviceProtection
+as.factor(churn_4$TechSupport) -> churn_4$TechSupport
+as.factor(churn_4$StreamingTV) -> churn_4$StreamingTV
+as.factor(churn_4$StreamingMovies) -> churn_4$StreamingMovies
+as.factor(churn_4$Contract) -> churn_4$Contract
+as.factor(churn_4$PaperlessBilling) -> churn_4$PaperlessBilling
+as.factor(churn_4$PaymentMethod) -> churn_4$PaymentMethod
+as.factor(churn_4$Churn) -> churn_4$Churn
+```
+
+#### Splitting the data-set into 80:20 ratio based on dependent feature
+
+```{r}
+set.seed(1)
+sample.split(churn_4$Churn, SplitRatio=0.80) -> churn_4_split_tag
+subset(churn_4, churn_4_split_tag==T) -> churn_4_train
+subset(churn_4, churn_4_split_tag==F) -> churn_4_test
+```
+
+#### Multiple Logistic Regression Model
+
+```{r}
+# Building Model
+log_mod_roc <- glm(Churn ~ +MonthlyCharges +tenure +TechSupport, data = churn_4_train, family = "binomial")
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(log_mod_roc)
+
+# Predicting for test data
+result_log_roc <- predict(log_mod_roc, newdata = churn_4_test, type = "response")
+
+# Checking significance of features, null & residual deviance and summary for the model
+summary(result_log_roc)
+```
+
+#### Plotting "Accuracy V/s Cutoff" (ROC Curve)
+
+```{r}
+predict_log <- prediction(result_log_roc, churn_4_test$Churn)
+performance(predict_log, "acc") -> acc
+plot(acc)
+
+roc_curve <- performance(predict_log,"tpr","fpr") 
+plot(roc_curve, colorize = T)
+```
+
+#### Calculating Area Under the Curve (AUC)
+
+```{r}
+auc.tmp <- performance(predict_log,"auc")
+auc <- as.numeric(auc.tmp@y.values)
+auc
+```

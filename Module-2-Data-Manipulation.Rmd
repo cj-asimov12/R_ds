@@ -1,0 +1,417 @@
+---
+title: "R : Module 2 : Data Manipulation"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+## Module 2 : Assignment 1 - filter()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv') 
+
+# 1. Extract the data of students who studied Science (hsc_s) from Central board (hsc_b) and secured more than 70 percent (hsc_p) and store it in s_science.
+filter(placement1, hsc_s=="Science" & hsc_b=="Central" & hsc_p > 70) -> s_science
+head(s_science)
+
+# 2. Extract the data of students who are pursuing a degree in Commerce & Management (degree_t) and specialization is Mkt&Fin and store it in d_commerce.
+filter(placement1, degree_t=="Comm&Mgmt" & specialisation=="Mkt&Fin") -> d_commerce
+head(d_commerce)
+
+# 3. Extract the data of students whose score in MBA (mba_p) is greater than 75 with etest score greater than 70.
+filter(placement1, mba_p > 75 & etest_p > 70) -> d_mba
+head(d_mba)
+
+# 4. Extract the data of students with specialization as Mkt&Fin with etest score greater than 90.
+filter(placement1, specialisation=="Mkt&Fin" & etest_p > 90) -> d_mkt_fin
+head(d_mkt_fin)
+
+# 5. Extract the data of students who are either from Commerce or Science stream. 
+filter(placement1, hsc_s=="Science" | hsc_s=="Commerce") -> d_sci_comm
+head(d_sci_comm)
+```
+
+## Module 2 : Assignment 2 - median()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# (A)
+# 1. Calculate the median of 'tenure' column and store it in med_tenure.
+median(customer_churn$tenure) -> med_tenure
+med_tenure
+
+# 2. Calculate the median of 'Monthly Charges' column and store it in med_MonthlyCharges.
+median(customer_churn$MonthlyCharges) -> med_MonthlyCharges
+med_MonthlyCharges
+
+# 3. Calculate the median of 'Total Charges' column and store it in med_TotalCharges.
+median(customer_churn$TotalCharges, na.rm=TRUE) -> med_TotalCharges
+med_TotalCharges
+
+
+# (B)
+# 1. Calculate the median of percentage scored in senior secondary exams (ssc_p) and store it in med_ssc.
+median(placement1$ssc_p) -> med_ssc
+med_ssc
+
+# 2. Calculate the median of scores in higher secondary exams 'hsc_p' and store it in med_hsc.
+median(placement1$hsc_p) -> med_hsc
+med_hsc
+
+# 3. Calculate the median of percentage score by students in their respective degree (degree_p) and store it in med_degree. 
+median(placement1$degree_p) -> med_degree
+med_degree
+```
+
+## Module 2 : Assignment 3 - mutate()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Add a column named 'Age' and assign a random value in customer churn dataset that lies within a range using sample() function based in the following conditions:
+# a. If the customer is a senior citizen (SeniorCitizen==1), then the age assigned to the customer lies between 56 and 100.  
+# b. If the customer is not a senior citizen (SeniorCitizen==0), then the age assigned to the customers lies between 16:55
+mutate(customer_churn, Age = ifelse(SeniorCitizen==0,sample(x=16:55),sample(x=56:100))) -> customer_churn
+head(customer_churn,100)
+
+# 2. Create a column named 'Customer_Category' based on the following condition:
+# a. The customers whose monthly charges are less than 45 will be named as 'Low Paying' customers.
+# b. The customers whose monthly charges are less than '90' will be named as 'Medium Paying' customers.
+# c. The customers whose monthly charges are greater than '90' will be named as 'High Paying' customers.
+mutate(customer_churn, Customer_Category = ifelse(MonthlyCharges < 45, "Low Paying",
+                                                  ifelse(MonthlyCharges < 90, "Medium Paying", "High Paying"))) -> customer_churn
+head(customer_churn)
+
+# 3. Create a column named "Security" based on the following condition:
+# a. The customers who have opted for 'Online Security' will be marked as 'Secure'.
+# b. The customers who have not opted for 'Online Security' will be marked as 'Not Secure'.
+mutate(customer_churn, Security = ifelse(OnlineSecurity=="Yes", "Secure", "Not Secure")) -> customer_churn
+head(customer_churn)
+```
+
+## Module 2 : Assignment 4 - select()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1. Extract the following columns using placement data-set:
+
+# a. Extract the specialization column (12th column) and store it in s_student.
+select(placement1,12) -> s_student
+head(s_student)
+
+# b. Extract the salary column (15th column) and store it in s_salary.
+select(placement1,15) -> s_salary
+head(s_salary)
+
+# c. Extract the higher secondary percentage column (5th column) and store it in hsc_percent.
+select(placement1,5) -> hsc_percent
+head(hsc_percent)
+
+
+# 2. Extract the following columns from the pharmacovigilance data-set:
+
+# a. Extract 1st, 3rd, and 5th column and store it in col_135.
+select(pharma1,1,3,5) -> col_135
+head(col_135)
+
+# b. Extract the 2nd and 6th column and store it in col_26.
+select(pharma1,2,6) -> col_26
+head(col_26)
+
+# 3. Extract column number 1 to 5 from placement data-set.
+select(placement1,1:5) -> d_placement_1_5
+head(d_placement_1_5)
+```
+
+## Module 2 : Assignment 5 - sd()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# (A)
+# 1. Calculate the standard deviation of 'tenure' column and store it in sd_tenure.
+sd(customer_churn$tenure) -> sd_tenure
+sd_tenure
+  
+# 2. Calculate the standard deviation of 'Monthly Charges' column and store it in sd_MonthlyCharges.
+sd(customer_churn$MonthlyCharges) -> sd_MonthlyCharges
+sd_MonthlyCharges
+
+# 3. Calculate the standard deviation of 'Total Charges' column and store it in sd_TotalCharges.
+sd(customer_churn$TotalCharges, na.rm=TRUE) -> sd_TotalCharges
+sd_TotalCharges
+
+
+# (B)
+# 1. Calculate the standard deviation of etest and store it in sd_etest.
+sd(placement1$etest_p) -> sd_etest
+sd_etest
+
+# 2. Calculate the standard deviation of salary and store it in sd_salary.
+sd(placement1$salary, na.rm=TRUE) -> sd_salary
+sd_salary
+
+# 3. Calculate the standard deviation of percentage score by students in MBA (mba_p) and store it in sd_mba.
+sd(placement1$mba_p) -> sd_mba
+sd_mba
+```
+
+## Module 2 : Assignment 6 - summarise()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1.Using summarize() function calculate the following for etest column:
+# a.Median
+# b.Variance
+# c.Standard Deviation
+summarise(placement1, median_etest=median(etest_p), variance_etest=var(etest_p), std_dev_etest=sd(etest_p))
+
+# 2.Calculate the following for MBA percentage(mba_p) of students:
+# a.Median
+# b.Variance
+# c.Standard Deviation
+summarise(placement1,median_mba=median(mba_p), variance_mba=var(mba_p), std_dev_mba=sd(mba_p))
+
+# 3.Calculate the median of hsc_p and group it w.r.t.'Salary' column.
+summarise(group_by(placement1,salary),median_hsc=median(hsc_p))
+
+# 4.Calculate variance ssc_p and group it w.r.t.'Salary' column.
+summarise(group_by(placement1,salary),variance_ssc=var(ssc_p,na.rm=TRUE))
+
+# 5.Calculate standard deviation of etest_p and group it w.r.t.'Salary'.
+summarise(group_by(placement1,salary),std_dev_etest=sd(etest_p,na.rm=TRUE))
+```
+
+## Module 2 : Assignment 7 - variance()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# (A)
+# 1. Calculate the variance of 'tenure' column and store it in var_tenure.
+var(customer_churn$tenure) -> var_tenure
+var_tenure
+
+# 2. Calculate the variance of 'Monthly Charges' column and store it in var_MonthlyCharges.
+var(customer_churn$MonthlyCharges) -> var_MonthlyCharges
+var_MonthlyCharges
+
+# 3. Calculate the variance of 'Total Charges' column and store it in var_TotalCharges.
+var(customer_churn$TotalCharges,na.rm=T) -> var_TotalCharges
+var_TotalCharges
+
+
+# (B)
+# 1. Calculate the variance of percentage scored in senior secondary exams (ssc_p) and store it in var_ssc.
+var(placement1$ssc_p) -> var_ssc
+var_ssc
+
+# 2. Calculate the variance of scores in higher secondary exams 'hsc_p' and store it in var_hsc.
+var(placement1$hsc_p) -> var_hsc
+var_hsc
+
+# 3. Calculate the variance of percentage score by students in their respective degree (degree_p) and store it in var_degree. 
+var(placement1$degree_p) -> var_degree
+var_degree
+```
+
+## Module 2 : Case Study 1 - select()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Extract these individual columns:
+# a. Extract the 5th column & store it in 'customer_5'
+select(churn1,5) -> customer_5
+head(customer_5)
+
+# b. Extract the 15th column & store it in 'customer_15'
+select(churn1,15) -> customer_15
+head(customer_15)
+
+# 2. Extract the column numbers 3,6,9,12,15 & 18 and store the result in 'customer_3_multiple'
+select(churn1,3,6,9,12,15,18) -> customer_3_multiple
+head(customer_3_multiple)
+
+# 3. Extract all the columns from column number-10 to column number-20 and store the result in 'c_10_20'
+select(churn1,10:20) -> c_10_20
+head(c_10_20)
+
+# 4. Extract all the columns which start with letter 'P' & store it in'customer_P'
+select(churn1,starts_with('P')) -> customer_p
+head(customer_p)
+
+# 5. Extract all the columns which end with letter 's' & store it in 'customer_s'
+select(churn1,ends_with('s')) -> customer_s
+head(customer_s)  
+```
+
+## Module 2 : Case Study 2 - sample() and count()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+#  Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Extract 333 random records from the customer_churn data-frame & store the result  'customer_333'
+sample_n(customer_churn,333) -> customer_333
+head(customer_333,40)
+
+# 2. Extract 1000 random records from the customer_churn data-frame & store the result in 'customer_1000'
+sample_n(customer_churn,1000) -> customer_1000
+head(customer_1000,40)
+
+# 3. Randomly extract 23% of the records from the customer_churn data-frame & store the result in 'customer_23_percent'
+sample_frac(customer_churn,0.23) -> customer_23_percent
+head(customer_23_percent,10)
+
+# 4. Get the count of different levels from the 'PaymentMethod' column
+count(customer_churn,PaymentMethod)
+
+# 5. Get the count of different levels from the 'Churn' column 
+count(customer_churn,Churn)
+```
+
+## Module 2 : Case Study 3 - summarise()
+
+### Loading required packages
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Get the median, variance & standard deviation for the 'tenure' column
+summarise(customer_churn,mean_ten=mean(tenure),var_ten=var(tenure),sd_ten=sd(tenure))
+
+# 2. Get the median, variance & standard deviation for the 'MonthlyCharges' column
+summarise(customer_churn,median_MC=median(MonthlyCharges),var_MC=median(MonthlyCharges),sd_MC=sd(MonthlyCharges))
+
+# 3. Get the standard deviation of 'tenure' & group it w.r.t 'PaymentMethod' column
+summarise(group_by(customer_churn,PaymentMethod),sd_tenure=sd(tenure))
+
+# 4. Get the median of 'MonthlyCharges' & group it w.r.t 'Contract' column
+summarise(group_by(customer_churn,Contract),median_MC=median(MonthlyCharges))
+
+# 5. Get the variance of 'TotalCharges' & group it w.r.t 'InternetService' column
+summarise(group_by(customer_churn,InternetService),var_TC=var(TotalCharges,na.rm=TRUE))
+```
+
+## Module 2 : Case Study 4 - sqldf package
+
+### Loading required packages
+
+```{r}
+library(sqldf)
+```
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Select the 'OnlineBackup' column from the customer_churn dataframe & store the result in 'customer_onine_backup'
+sqldf("select OnlineBackup from customer_churn") -> customer_online_backup
+head(customer_online_backup)
+
+# 2. Select the 'StreamingTV', 'StreamingMovies' & 'Contract' columns and store the result in 'customer_streaming_contract'
+sqldf("select StreamingTV, StreamingMovies, Contract from customer_churn") -> customer_streaming_contract
+head(customer_streaming_contract)
+
+# 3. Select all the customers whose payment method is 'mailed check' and store the result in 'customer_mail'
+sqldf("select * from customer_churn where PaymentMethod='Mailed check'") -> customer_mail
+head(customer_mail)
+
+# 4. Select all the Female customers whose tenure is of 1 month & Payment Method is 'mailed check' and store the result in 'customer_random_selection
+sqldf("select * from customer_churn where gender='Female' and PaymentMethod='Mailed check' ") -> customer_random_selection
+head(customer_random_selection)
+```
