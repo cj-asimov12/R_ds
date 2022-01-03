@@ -1,0 +1,1299 @@
+---
+title: "R : Module 1 : Intro To R"
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{fvextra} \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      tidy = 'formatR',
+                      #tidy.opts = list(blank = FALSE, width.cutoff = 90),
+                      prompt = F,
+                      size = 'large')
+```
+
+### Module 1 : Assignment 1 - Arithmetic Operator
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# a) Increase the monthly charges of 1st record by 5.
+churn1$MonthlyCharges[1]+5 -> churn1$MonthlyCharges[1]
+churn1$MonthlyCharges[1]
+
+# b) Increase the monthly charges of the 5th record by 22. 
+churn1$MonthlyCharges[5]+22 -> churn1$MonthlyCharges[5]
+churn1$MonthlyCharges[5]
+
+# c) Reduce the total charges of the 4th record by 40.75.
+churn1$TotalCharges[4]-40.75 -> churn1$TotalCharges[4]
+churn1$MonthlyCharges[4]
+
+# d) Subtract the total charges from 2nd record by 100. 
+churn1$TotalCharges[2]-100 -> churn1$TotalCharges[2]
+churn1$MonthlyCharges[2]
+
+# e) Reduce the monthly charges of the 25th record by 4.6 and divide it by 5. 
+(churn1$MonthlyCharges[25]-4.6)/5 -> churn1$MonthlyCharges[25]
+churn1$MonthlyCharges[25]
+
+# f) Increase the value of the total charge of the 5th record by 5.3 and multiply it by 2. 
+(churn1$TotalCharges[5]+5.3)*2 -> churn1$TotalCharges[5]
+churn1$MonthlyCharges[5]
+
+# g) Multiply the 12th record of monthly charges by 5. 
+churn1$MonthlyCharges[12]*5 -> churn1$MonthlyCharges[12]
+churn1$MonthlyCharges[12]
+```
+
+### Module 1 : Assignment 2 - Array
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Create an array as per the given data:
+
+# a. An array named array_total_charges that contains the first 10 values from the total charges column.
+array(data=churn1$TotalCharges[1 :10]) -> array_total_charges
+array_total_charges
+
+# b. An array named array_monthly_charges that contains first five values from the monthly charges column. 
+array(data=churn1$MonthlyCharges[1 :5]) -> array_monthly_charges
+array_monthly_charges
+
+# 2. Create an array using placement data set that comprises of: 
+
+# a. Data of first 15 values from salary column. 
+array(data=placement1$salary[1 :15]) -> array_salary
+array_salary
+
+# b. Data of first five values from mba_p column. 
+array(data=placement1$mba_p[1 :5]) -> array_mba_p
+array_mba_p
+
+# c. Data of first 10 values from e_test column. 
+array(data=placement1$etest_p[1 :10]) -> array_etest_p
+array_etest_p
+```
+
+### Module 1 : Assignment 3 - C Function
+
+```{r}
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1. Extract the following columns from the data set: 
+
+# a. Age and Issues.
+df1 <- pharma1[ ,c("Issues","Age")]
+head(df1)
+
+# b. Patient ID and Drug ID. 
+df2 <- pharma1[ ,c("PatientID", "DrugID")]
+head(df2)
+
+# c. Gender, Age, and Issues. 
+df3 <- pharma1[ ,c("Gender", "Age", "Issues")]
+head(df3)
+
+# 2. Extract the following rows:
+
+# a. Row numbers 1,2,3,4, and 5
+pharma1[1 :5,]
+
+# b. Rows from 15 to 75
+df4 <- pharma1[15:75,]
+head(df4)
+tail(df4)
+
+# c. Rows from 100-150
+df5 <- pharma1[100:150,]
+head(df5)
+tail(df5)
+
+# 3. Extract the following rows and columns: 
+
+# a. Columns (1,2,4) and rows(1 to 10)
+pharma1[1 :10,c(1,2,4)]
+
+# b. Columns (2,4,5) and rows(50 to 120) 
+df6 <- pharma1[50:120,c(2,4,5)]
+head(df6)
+tail(df6)
+
+# c. Columns (1,3,6) and rows(100 to 200) 
+df7 <- pharma1[100:200, c(1,3,6)]
+head(df7)
+tail(df7)
+```
+
+### Module 1 : Assignment 4 - Calculate Mean
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Calculate the mean of the following columns from customer churn data-set: 
+
+# a. Tenure
+mean(churn1$tenure)
+
+# b. Monthly Charges
+mean(churn1$MonthlyCharges)
+
+# c. Total Charges
+mean(churn1$TotalCharges, na.rm = TRUE)
+
+# 2. Calculate the mean of the following columns from the placement data-set:
+
+# a. Ssc_p
+mean(placement1$ssc_p)
+
+# b. Hsc_p
+mean(placement1$hsc_p)
+
+# c. Degree_p
+mean(placement1$degree_p)
+
+# d. Etest_p
+mean(placement1$etest_p)
+
+# e. Mba_p
+mean(placement1$mba_p)
+
+# f. Salary 
+mean(placement1$salary, na.rm = TRUE)
+```
+
+### Module 1 : Assignment 5 - Class Function
+
+```{r}
+# Loading the data-set
+citytemp1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Find the class of the following attributes and covert to character data-type:
+
+# a. Region
+class(citytemp1$Region)
+
+# b. Country
+class(citytemp1$Country)
+
+# c. City
+class(citytemp1$City)
+
+# d. Month
+class(citytemp1$Month)
+# Converting month to character class
+citytemp1$Month <- as.character(citytemp1$Month)
+
+# e. Day
+class(citytemp1$Day)
+# Converting Day to character class
+citytemp1$Day <- as.character(citytemp1$Day)
+
+# f. Year
+class(citytemp1$Year)
+# Converting Year to character class
+citytemp1$Year <- as.character(citytemp1$Year)
+
+# g. AvgTemperature
+class(citytemp1$AvgTemperature)
+# Converting AvgTemperature to character class
+citytemp1$AvgTemperature <- as.character(citytemp1$AvgTemperature)
+
+# 2. After finding the class of the below attributes, convert them to the following class:
+
+# i) Vector to Character
+
+# a. Gender
+class(placement1$gender)
+
+# b. ssc_b
+class(placement1$ssc_b)
+
+# c. hsc_b
+class(placement1$hsc_b)
+
+# d. hsc_s
+class(placement1$hsc_s)
+
+# e. status
+class(placement1$status)
+
+# f. workex
+class(placement1$workex)
+
+# g. specialization 
+class(placement1$specialisation)
+```
+
+### Module 1 : Assignment 6 - For Loop
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Using for loop, calculate the number of students from the placement data set according to the following conditions:
+# a) Students who are placed.
+count_placed=0
+for(i in 1 :nrow(placement1)){
+  if(placement1$status[i]=="Placed"){
+    count_placed=count_placed+1
+  }
+}
+count_placed
+
+# b) Students who are from Science stream.
+count_science=0
+for(i in 1 :nrow(placement1)){
+  if(placement1$degree_t[i]=="Sci&Tech"){
+    count_science=count_science+1
+  }
+}
+count_science
+
+# c) Students who are from Commerce stream. 
+count_commerce=0
+for(i in 1 :nrow(placement1)){
+  if(placement1$degree_t[i]=="Comm&Mgmt"){
+    count_commerce=count_commerce+1
+  }
+}
+count_commerce
+
+
+
+# 2. Using for loop, calculate the number of students from the placement data set who scored more than 80.0 in higher secondary exams (hsc_p).
+count_hsc_p80=0
+for (i in 1 :nrow(placement1)){
+  if(placement1$hsc_p[i]>80.0){
+    count_hsc_p80=count_hsc_p80+1
+  }
+}
+count_hsc_p80
+
+# 3. Calculate the number of students who scored more than 75% in MBA (mba_p)and got placed from campus placement drives.
+count_mba75_placed=0
+for(i in 1 :nrow(placement1)){
+  if(placement1$mba_p[i]>75 && placement1$status[i]=="Placed"){
+    count_mba75_placed=count_mba75_placed+1
+  }
+}
+
+count_mba75_placed 
+
+# 4. Calculate the number of senior citizens from customer churn data set who are using internet service as 'DSL'. 
+count_senior=0
+for(i in 1 :nrow(churn1)){
+  if(churn1$SeniorCitizen[i]==1 && churn1$InternetService[i]=="DSL"){
+    count_senior=count_senior+1
+  }
+}
+count_senior 
+```
+
+### Module 1 : Assignment 7 - If-Else
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Using the placement data set, perform the following tasks:
+# a. Check the value of 95th row of status column.
+  # If the value is "Placed", then print "The student is placed from campus placement drives".
+  # If it's "Not Placed", then print "The student is not placed from campus placement drives."
+  # If it's "NA", then print "The data of the student is not available." 
+
+if(placement1$status[95]=="Placed"){
+  print("The student is placed from campus placement drives.")
+}else if(placement1$status[95]=="Not Placed"){
+  print("The student is not placed from campus placement drives.")
+}else(print("The data of the student is not available."))
+  
+
+# b. Check the value of 64th row of hsc_s column.
+  # If it is "Science", then print "The subject opted by the student is Science."
+  # If it is "Commerce", then print "The subject opted by the student is Commerce."
+  # If it is "Arts", then print "The subject opted by the student is Arts." 
+if(placement1$hsc_s[64]=="Science"){
+  print("The subject opted by the student is Science.")
+}else if(placement1$hsc_s[64]=="Commerce"){
+  print("The subject opted by the student is Commerce.")
+}else(print("The subject opted by the student is Arts."))
+
+
+# c. Check the 28th row of Payment method column:
+  # If it is "Credit card (automatic)", then print "The customer is using credit card as their payment method."
+  # If it is "Mailed check", then print "The customer is using mailed check for payment."
+  # If it is "Electronic check", then print "The customer is using electronic check for payment."
+if(churn1$PaymentMethod[28]=="Credit card (automatic)"){
+  print("The customer is using credit card as their payment method.")
+}else if(churn1$PaymentMethod[28]=="Mailed check"){
+  print("The customer is using mailed check for payment.")
+}else if(churn1$PaymentMethod[28]=="Electronic check"){
+  print("The customer is using electronic check for payment.")
+}else{
+  print("The customer is using bank transfer as their payment method.")
+}
+```
+
+### Module 1 : Assignment 8 - If-Else
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Loading the data-set
+city1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# Using the placement data-set, perform the following tasks:
+# a. Check the value of 12th row of degree_t column, if the value is "Comm&Mgmt", and then print "The student is of the stream Commerce and Management".
+if(placement1$degree_t[12]=="Comm&Mgmt"){
+  print("The student is of the stream Commerce and Management")
+}
+
+# b. Check the value of 23rd row of specialization column, if the value is "Mkt&HR", then print "The specialization of student is Marketing and Human Resource"
+if(placement1$specialisation[23]=="Mkt&HR"){
+  print("The specialization of student is Marketing and Human Resource")
+}
+
+# c. Check the 39th row of status column, if the value is "Placed", then print "The student is placed from campus."
+if(placement1$status[39]=="Placed"){
+  print("The student is placed from campus.")  
+}
+
+
+# Using the pharmacovigilance data-set, perform the following tasks:
+# a. Check the value of 37th row of Issues column, if the value is "Medication history documenting error", then print "The patient's medical record is missing"
+if(pharma1$Issues[37]=="Medication history documenting error"){
+  print("The patient's medical record is missing")
+}
+
+# b. Check the value of 180th row of Issues column, if the value is "Unclear Route", then print "The patient is having an unclear route of transmission"
+if(pharma1$Issues[180]=="unclear route"){
+  print("The patient is having an unclear route of transmission")
+}
+
+# c. . Check the 220th row of Location ID column, if the value is "Location3", then print "The location ID of the patient is Location3."
+if(pharma1$LocationID[220]=="Location3"){
+  print("The location ID of the patient is Location3.")  
+}
+
+# Using the city-temperature data-set, perform the following tasks:
+# a. Check the value of 11th row of Region column, if the value is "Africa", then print "The region for which we are calculating average temperature is Africa"
+if(city1$Region[11]=="Africa"){
+  print("The region for which we are calculating average temperature is Africa")
+}
+
+# b. Check the value of row number 79961 of city column, if the value is "Conakry", then print "The city for which we are calculating average temperature is Conakry".
+if(city1$City[79961]=="Conakry"){
+  print("The city for which we are calculating average temperature is Conakry")
+}
+
+# c. Check the value of 70th row of year column, if the value is "1995", then prints "We are calculating average temperature for the year 1995".
+if(city1$Year[70]=="1995"){
+  print("We are calculating average temperature for the year 1995")  
+}
+```
+
+### Module 1 : Assignment 9 - Switch Case
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Using switch case, check 67th row of hsc_s column from placement data:
+  # If it is "Science", then add 5 extra marks in degree_p score.
+  # If it is "Commerce", then add 3 extra marks in degree_p score. 
+switch(as.character(placement1$hsc_s[67]),
+       "Science"=placement1$degree_p[67]+5,
+       "Commerce"=placement1$degree_p[67]+3) -> placement1$degree_p[67]
+placement1$degree_p[67]
+
+# 2. Check 74th row of ssc_b column in the placement data set:
+  #  If it is "Others", then add 3 as grace marks in hsc_p for the 74th row.
+  #  If it is "Central", then add 5 as grace marks in hsc_p for the 74th row.S
+switch(as.character(placement1$ssc_b[74]),
+       "Others"=placement1$hsc_p[74]+3,
+       "Central"=placement1$hsc_p[74]+5) -> placement1$hsc_p[74]
+placement1$hsc_p[74]
+
+# 3. Using switch case, check 4th row of contract column from customer churn data:
+#  If it is "One Year", then give a 20% discount in total charges.
+#  If it is "Month-to-month", then give a discount of 5% in total charges. 
+switch(as.character(churn1$Contract[4]),
+       "One year"=churn1$TotalCharges[4]-(churn1$TotalCharges[4] * 0.20),
+       "Month-to-month"=churn1$TotalCharges[4]-(churn1$TotalCharges[4] * 0.05)) -> churn1$TotalCharges[4]
+churn1$TotalCharges[4]
+
+# 4. Check 14th row of Internet Service column in the customer churn data set:
+#  If the customer is using "Fiber optic", then give a discount of 15% in total charges.
+#  If it is "DSL", then give a discount of 10% in total charges. 
+switch(as.character(churn1$InternetService[14]),
+       "Fiber optic"=churn1$TotalCharges[14]-(churn1$TotalCharges[14] * 0.15),
+       "DSL"=churn1$TotalCharges[14]-(churn1$TotalCharges[14] * 0.10)) -> churn1$TotalCharges[14]
+churn1$TotalCharges[14]
+```
+
+### Module 1 : Assignment 10 - While Loop
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Calculate the number higher secondary students who are from "Central" board.
+count_ssc_central=0
+i=1
+while(i<=nrow(placement1)){
+  if(placement1$ssc_b[i]=="Central"){
+    count_ssc_central=count_ssc_central+1  
+  }
+i=i+1
+}
+count_ssc_central
+
+# 2. Calculate the number of students who are from Science stream and secured percentage greater than 75. 
+count_hsc_science=0
+i=1
+while(i<=nrow(placement1)){
+  if(placement1$hsc_s[i]=="Science" && placement1$hsc_p[i] > 75){
+    count_hsc_science=count_hsc_science+1  
+  }
+  i=i+1
+}
+count_hsc_science
+
+# 3. Calculate the number of customers from customer churn data set as per following condition:
+#  (i) The customer should be a senior citizen who is having a contract of 'One year' for 'Fiber optic' there as internet service.
+count=0
+i=1
+while(i<=nrow(churn1)){
+  if(churn1$SeniorCitizen[i]==1 && churn1$Contract[i]=="One year" && churn1$InternetService[i]=="Fiber optic"){
+    count=count+1  
+  }
+  i=i+1
+}
+count
+
+#(ii) The customer is not a senior citizen who is having a contract of 'Two year' and total charges is less than 7000.
+
+#Checking for NA values
+sum(is.na(churn1))
+
+#Removing NA Values
+churn1 <- na.omit(churn1)
+
+count=0
+i=1
+while(i<=nrow(churn1)){
+  if(churn1$SeniorCitizen[i]==0 && churn1$Contract[i]=="Two year" && churn1$TotalCharges[i] < 7000){
+    count=count+1  
+  }
+  i=i+1
+}
+count
+
+#(iii) The customers whose monthly charges are greater than 6500. 
+count=0
+i=1
+while(i<=nrow(churn1)){
+  if(churn1$MonthlyCharges[i] > 6500){
+    count=count+1  
+  }
+  i=i+1
+}
+count
+```
+
+### Module 1 : Assignment 11 - Subset Function
+
+```{r}
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1. Extract a subset of pharmacovigilance data of all the female patients whose age is less than 25 with issues of unclear dose. 
+df1 <- subset(pharma1, Gender=="F" & Age <=25 & Issues=="unclear dose")
+head(df1)
+
+# 2. Extract the records of all the male patients whose age is less than 25 and medication data is not available. 
+df2 <- subset(pharma1, Gender=="M" & Age <=25 & Issues=="Medication history documenting error")
+head(df2)
+
+# 3. Fetch the records of children whose age equals to 8 whose documentation of medication history is not available. 
+df3 <- subset(pharma1, Age==8 & Issues=="Medication history documenting error")
+head(df3)
+
+# 4. Extract all the records of female children of age>5 having an unclear dose.
+df4 <- subset(pharma1, Gender=="F" & Age>5 & Issues=="unclear dose")
+head(df4)
+
+# 5. Extract the records of male patients of age equals to 35 with an unclear route of transmission. 
+df5 <- subset(pharma1, Gender=="M" & Age==35 & Issues=="unclear dose")
+head(df5)
+```
+
+### Module 1 : Assignment 12 - Calculating Number of Rows
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Check how many rows and columns are there in the data-set?
+nrow(placement1)
+ncol(placement1)
+
+# 2. Extract the data of people who are having the branch as Sci&Tech and who are employed.  
+# Then, check how many such people are there who are employed by finding the number of rows that contains the data of employed people.
+
+df1 <- subset(placement1, degree_t=="Sci&Tech" & status=="Placed")
+nrow(df1)
+
+# 3. Find the number of rows of female students who are from Arts or Commerce stream. 
+df2 <- subset(placement1, gender=="F" & (hsc_s=="Arts" | hsc_s=="Commerce"))
+nrow(df2)
+
+# 4. Fetch the number records of all the students as per the following condition and find the number of such students:
+
+# a. Students who are placed
+df3 <- subset(placement1, status=="Placed")
+nrow(df3)
+
+# b. Students who are earning more than 300000
+df4 <- subset(placement1, salary > 300000)
+nrow(df4)
+
+# 5. Find the number of columns having data type as following:
+# a. Integer
+# b. Factor
+table(sapply(placement1,class))
+
+#OR
+str(placement1)
+```
+
+### Module 1 : Assignment 13 - Logical Operator
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Extract the data of customers as per the following conditions:
+
+# a. People who are senior citizen of gender female.
+df1 <- subset(churn1, SeniorCitizen==1 & gender=="Female")
+head(df1)
+
+# b. Female customers who are not having partner.
+df2 <- subset(churn1, gender=="Female" & Partner=="No")
+head(df2)
+
+# c. Customers using 'DSL' as their internet service with no online security.
+df3 <- subset(churn1, InternetService=="DSL" & OnlineSecurity=="No")
+head(df3)
+
+# d. Customers using 'Fiber optics' as internet service with no online backup.
+df4 <- subset(churn1, InternetService=="Fiber optic" & OnlineBackup=="No")
+head(df4)
+
+# e. Senior citizens using payment method as electronic check. 
+df5 <- subset(churn1, SeniorCitizen==1 & PaymentMethod=="Electronic check")
+head(df5)  
+  
+
+# 2. Extract the data of customers who are:
+
+# a. Using payment method as mailed check and having a contract of one year
+df6 <- subset(churn1, PaymentMethod=="Mailed check" & Contract=="One year")
+head(df6)
+
+# b. Having services such as online security, online backup, device protection, and tech support enabled
+df7 <- subset(churn1, OnlineSecurity=="Yes" & OnlineBackup=="Yes" & DeviceProtection=="Yes" & TechSupport=="Yes")
+head(df7)
+
+# c. Not senior citizens having tenure of 72 months.  
+df8 <- subset(churn1, SeniorCitizen==0 & tenure==72)
+head(df8)  
+
+
+# 3. Check the customers data where the customer's are:
+
+# a. Either using bank transfer or credit card as their payment method.
+df9 <- subset(churn1, PaymentMethod=="Bank transfer (automatic)" | PaymentMethod=="Credit card (automatic)")
+head(df9)
+
+# b. Having phone service or multiple lines enabled.
+df10 <- subset(churn1, PhoneService=="Yes")
+head(df10)
+
+# c. Either having payment method as mailed check or electronic check.
+df11 <- subset(churn1, PaymentMethod=="Mailed check" | PaymentMethod=="Electronic check")
+head(df11)
+
+# d. Either using fiber optic or having no internet service.   
+df12 <- subset(churn1, InternetService=="Fiber optic" | InternetService=="No")
+head(df12) 
+```
+
+### Module 1 : Assignment 14 - Relational Operator
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Extract the data of the students who are:
+
+# a. Having SSC score greater than or equal to 65.
+df1 <- subset(placement1, ssc_p >= 65)
+head(df1)
+
+# b. Having HSC score greater than 80.
+df2 <- subset(placement1, hsc_p > 80)
+head(df2)
+
+# c. Earning more than 200000. 
+df3 <- subset(placement1, salary > 200000)
+head(df3)
+
+
+# 2. Extract the data of the students who are:
+
+# a. Placed and earning salary less than 250000.
+df4 <- subset(placement1, status=="Placed" & salary < 250000)
+head(df4)
+
+# b. From commerce and management having earning salary less than 600000.
+df5 <- subset(placement1, degree_t=="Comm&Mgmt" & salary < 600000)
+head(df5)
+
+# c. From Science stream with etest score greater than 90.     
+df6 <- subset(placement1, hsc_s=="Science" & etest_p > 90)
+head(df6)
+
+
+# 3. Extract the data of the students who are:
+
+# a. From Central board studying Arts.
+df7 <- subset(placement1, ssc_b=="Central" & hsc_s=="Arts")
+head(df7)
+
+# b. From Sci&Tech with e_test score equals to 75.
+df8 <- subset(placement1, degree_t=="Sci&Tech" & etest_p==75)
+head(df8)  
+
+# c. Placed with a salary of 450000.   
+df9 <- subset(placement1, status=="Placed" & salary==450000)
+head(df9)
+```
+
+### Module 1 : Assignment 15 - table()
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Check the categories of various columns given below using table function :
+
+# a. Gender
+table(churn1$gender)
+  
+# b. Senior Citizen
+table(churn1$SeniorCitizen)
+  
+# c. Partner
+table(churn1$Partner)
+  
+# e. Dependents
+table(churn1$Dependents)
+  
+# f. Phone Service
+table(churn1$PhoneService)
+  
+# g. Multiple Lines
+table(churn1$MultipleLines)
+  
+# h. Internet Service
+table(churn1$InternetService)
+  
+# i. Online Security
+table(churn1$OnlineSecurity)
+  
+# j. Online Backup
+table(churn1$OnlineBackup)
+  
+# k. Contract
+table(churn1$Contract)
+  
+# l. Payment Method 
+table(churn1$PaymentMethod)
+
+# And extract the data of male customers who are senior citizens with partners, internet service as DSL and phone services enabled     
+df1 <- subset(churn1, gender=="Male" & SeniorCitizen==1 & Partner=="Yes" & InternetService=="DSL" & PhoneService=="Yes")
+head(df1)
+```
+
+### Module 1 : Assignment 16 - head()
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Check the first five values of the following columns using the head function:
+# a. Sl_no
+# b. Gender
+# c. Ssc_p
+# d. Ssc_b
+# e. Hsc_p
+# f. Degree_p
+# g. Degree_t
+# h. Etest_p
+# i. Specialization
+# j. Mba_p
+# k. Salary
+head(placement1)
+
+# 2. Add 5000 to the first six data of the salary column. 
+head(placement1$salary,6)+5000
+
+# 3. Add 7.5 to the first 10 values of e_test column. 
+head(placement1$etest_p,10)+7.5
+
+# 4. Reduce the mba_p score by 5 for the first three values
+head(placement1$mba_p,3)-5
+```
+
+### Module 1 : Assignment 17 - tail()
+
+```{r}
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# 1. Extract the last few values of the following columns from the placement data-set:
+# a. Ssc_p
+# b. Hsc_p
+# c. Degree_p
+# d. Etest_p
+# e. Mba_p
+# f. Salary
+tail(placement1)
+
+# 2. Check and add 12000 to the last 8 values of the salary column.
+tail(placement1$salary,8)+12000
+
+# 3. Check and increase the mba_p score by 10 for the last few values. 
+tail(placement1$mba_p)
+tail(placement1$mba_p)+10
+```
+
+### Module 1 : Assignment 18 - sample()
+
+```{r}
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# 1. Extract some random set of values using sample function.
+
+# a. Select five random values from LocationID.
+sample(pharma1$LocationID, size=5)
+
+# b. Extract 25 random values from age column.
+sample(pharma1$Age, size=25)
+
+# c. Extract 15 random from PatientID.
+sample(pharma1$PatientID, size=15)
+
+# d. Extract 10 random values from Issues column. 
+sample(pharma1$Issues, size=10)
+```
+
+### Module 1 : Assignment 19 - str()
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Loading the data-set
+city1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+# 1. Find the structure of customer churn data-set using str() function and perform the following operations:
+str(churn1)
+  
+# a. Convert the data type of internet service column from vector to character.
+as.character(churn1$InternetService) -> churn1$InternetService
+  
+# b. Convert the data type of partner column from vector to character.
+as.character(churn1$Partner) -> churn1$Partner
+  
+# c. Convert the data type of total charges column from num to int.
+as.integer(churn1$TotalCharges) -> churn1$TotalCharges
+
+
+# 2. Find the structure of the placement data.
+str(placement1)
+  
+# 3. Find the structure of the pharmacovigilance data.
+str(pharma1)  
+
+# 4. Find the structure of city temperature data-set. 
+str(city1)  
+```
+
+### Module 1 : Assignment 20 - Matrix
+
+```{r}
+# 1. Create a matrix named 'm_even' with the 16 continuous even values. The matrix should have 4 rows & 4 columns. Also, arrange the elements by row.
+m_even <- matrix(data=seq(2, by=2, len=16), nrow=4, ncol=4, byrow = TRUE)
+m_even
+
+# 2. Create a matrix name 'm_odd' having 4 rows and 4 columns with 16 consecutive odd values arranged by row.
+m_odd <- matrix(data=seq(1, by=2, len=16), nrow=4, ncol=4, byrow = TRUE)
+m_odd
+
+# 3. Create a matrix named m_8 as per the following conditions:
+# a. The dimension of the matrix should be 8x8.
+# b. It should have consecutive values starting from 1.
+# c. It should be arranged by row. 
+m_8 <- matrix(data=seq(1, by=1, len=64), nrow=8, ncol=8, byrow=TRUE)
+m_8
+```
+
+### Module 1 : Assignment 21 - Lists
+
+```{r}
+# 1. Create a list named internet_service using the following condition:
+
+# a. A character vector that consists of name of the internet services as "DSL", "Fiber Optic", "Cable Broadband", and "Wireless".
+vec_1 <- c("DSL", "Fiber Optic", "Cable Broadband", "Wireless")  
+class(vec_1)
+
+# b. A numeric vector that consists of values from 30 to 40
+vec_2 <- c(seq(30,by=1,40))
+class(vec_2)
+
+# c. A logical vector having 6 values as: True, False, True, True, True, and False
+vec_3 <- c(TRUE, FALSE, T, T, T, F)
+class(vec_3)
+
+# List named internet_service including above vectors
+internet_service <- list(vec_1, vec_2, vec_3)
+internet_service
+
+# 2. Create a list named payment_method using the following condition:
+
+# a. A character vector comprising of payment methods as: 'Electronic Check', 'Mailed Check', 'Credit Card', and 'Online Transfer'.
+v1 <- c("Electronic Check", "Mailed Check", "Credit Card", "Online Transfer")
+v1
+
+# b. A numeric vector that consists of values from 85-95
+v2 <- c(seq(85,by=1,95))
+v2
+
+# c. A logical vector having 6 values as: True, True, False, True, False, and True. 
+v3 <- c(T,T,F,T,F,T)
+v3
+
+# List named payment_method including above vectors
+payment_method <- list(v1, v2, v3)
+payment_method
+
+# 3. Create a list named contract_list using the following condition:
+
+# a. A character vector comprising of contract type as: "Month to month", "One Year", "Two Year", and "Three Year".
+vect_1 <- c("Month to month", "One Year", "Two Year", "Three Year")
+vect_1
+
+# b. A numeric vector comprising of five values as: '1', '12', '17', '32', and '72'.
+vect_2 <- c(1,12,17,32,72)
+vect_2
+
+# c. A logical vector comprising of four values: True, False, True, and True.
+vect_3 <- c(T,F,T,F) 
+vect_3
+
+# List named internet_service including above vectors
+contract_list <- list(vect_1,vect_2,vect_3)
+contract_list
+
+# i. Now, extract the 2nd value from the first element of the list
+contract_list[[1]][[2]]
+  
+# ii. Extract the 3rd value from the 2nd element of the list
+contract_list[[2]][[3]]
+
+# iii. Extract the 4th value from the 1st element of the lists 
+contract_list[[1]][[4]]
+```
+
+### Module 1 : Assignment 22 - Vectors
+
+```{r}
+# 1. Create the character vector:
+# a. Name it as v_specialization
+# b. Put values as: "Marketing", "Finance", "TechSupport", and "Development"
+v_specialization <- c("Marketing", "Finance", "TechSupport", "Development")
+v_specialization
+
+# 2. Create the numeric vector:
+# a. Name it as v_num
+# b. Put values as: 2, 4, 16, 64, 256, and 1024.
+v_num <- c(2,4,16,64,256,1024)
+v_num
+
+# 3. Create the logical vector:
+# a. Name it as v_logic
+# b. Put values as: True, False, True, True, and True. 
+v_logic <- c(T,F,T,T,T)
+v_logic
+```
+
+### Module 1 : Assignment 23 - range()
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# Loading the data-set
+placement1 <- read.csv('/home/carb0n/Desktop/r/d/Placement_Data_Full_Class.csv')
+
+# Loading the data-set
+pharma1 <- read.csv('/home/carb0n/Desktop/r/d/Pharmacovigilance_audit_Data.csv')
+
+# Loading the data-set
+city1 <- read.csv('/home/carb0n/Desktop/r/d/city_temperature.csv')
+
+
+# 1.Calculate the range of following columns of customer churn dataset:
+
+# a.Tenure
+range(churn1$tenure)
+
+# b.Monthly Charges
+range(churn1$MonthlyCharges)
+
+# c.Total Charges
+range(churn1$TotalCharges, na.rm=TRUE)
+  
+
+# 2.Calculate the range of following columns of city temperature dataset:
+
+# a. Day
+range(city1$Day)
+  
+# b.Year
+range(city1$Year)
+  
+# c.Average Temperature
+range(city1$AvgTemperature)
+  
+
+# 3.Calculate the range of following columns of pharmacovigilance dataset:
+
+# a.Age
+range(pharma1$Age)
+
+# b.Patient ID
+range(pharma1$PatientID)
+
+
+# 4.Calculate the range of following columns of placement dataset:
+
+# a.Sl_no
+range(placement1$sl_no)
+  
+# b.Ssc_p
+range(placement1$ssc_p)
+  
+# c.Hsc_p
+range(placement1$hsc_p)
+  
+# d.Degree_p
+range(placement1$degree_p)
+  
+# e.Etest_p
+range(placement1$etest_p)
+  
+# f.Mba_p
+range(placement1$mba_p)
+  
+# g.Salary 
+range(placement1$salary, na.rm=TRUE)
+```
+
+### Module 1 : Case Study 1 - Data Exploration
+
+```{r}
+
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Extract these individual columns with the '$' symbol:
+
+# a. Extract 'InternetService' column and store it in'customer_internet_service'
+customer_churn$InternetService -> customer_internet_service 
+head(customer_internet_service)
+
+# b. Extract 'PaperlessBilling' column and store it in'customer_Paperless_Billing'
+customer_churn$PaperlessBilling -> customer_Paperless_Billing 
+head(customer_Paperless_Billing)
+
+# c. Extract 'StreamingTV' column and store it in'customer_Streaming_TV'
+customer_churn$StreamingTV -> customer_Streaming_TV 
+head(customer_Streaming_TV)
+
+
+# 2. Extract the 3rd, 6th and 9th columns from the 'customer_churn' data.frame & store it in 'customer_random_columns'
+customer_churn[,c(3,6,9)] -> customer_random_columns
+head(customer_random_columns)
+
+
+# 3. Extract all the columns from column number-10 to column-number 20 and store the result in 'customer_10_20'
+customer_churn[,(10:20)] -> customer_10_20
+head(customer_10_20)
+
+
+# 4. Extract only these row numbers: 65, 765, 3726 & 7000 and store the result in 'customer_random_rows'
+customer_churn[c(65,765,3726,7000),] -> customer_random_rows
+customer_random_rows
+
+
+# 5. Extract all the rows starting from row number-655 to row number-6550 & store the result in'customer_continuous_rows'
+customer_churn[(655:6550),] -> customer_continuous_rows
+head(customer_continuous_rows)
+tail(customer_continuous_rows)
+
+
+# 6. Extract row numbers- 10, 100 & 1000 & column numbers- 5, 10, 15 & store the result in 'customer_random_data'
+customer_churn[c(10,100,1000),c(5,10,15)] -> customer_random_data
+customer_random_data
+```
+
+### Module 1 : Case Study 2 - Operators
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Working with arithmetic operators:
+
+# a. Add 5 to the fifth record of 'MonthlyCharges' column
+customer_churn$MonthlyCharges[5]+5 -> customer_churn$MonthlyCharges[5]
+customer_churn$MonthlyCharges[5]
+
+# b. Subtract 9.65 from the sixth record of 'MonthlyCharges' column
+customer_churn$MonthlyCharges[6]-9.65 -> customer_churn$MonthlyCharges[6]
+customer_churn$MonthlyCharges[6]
+
+# c. Multiply the 1st record of 'MonthlyCharges' column with 3
+customer_churn$MonthlyCharges[1]*3 -> customer_churn$MonthlyCharges[1] 
+customer_churn$MonthlyCharges[1] 
+
+# d. Divide the 37th record of 'MonthlyCharges' column with 3
+customer_churn$MonthlyCharges[37]/3 -> customer_churn$MonthlyCharges[37]
+customer_churn$MonthlyCharges[37]
+
+
+# 2. Working with the relational operators:
+# a. Check if the value of 'tenure' in the 1st row is greater than the value of 'tenure' in the 10th row
+customer_churn$tenure[1] > customer_churn$tenure[10] 
+ 
+# b. Check if the value of 'tenure' in the 3rd row is equal to the value of 'tenure' in the 5th row
+customer_churn$tenure[3] == customer_churn$tenure[5]
+
+
+# 3. Working with logical operators:
+# a. Get the count of those customers who have subscribed to both "TechSupport" &"StreamingTV"
+nrow(subset(customer_churn, customer_churn$TechSupport=="Yes" & customer_churn$StreamingTV=="Yes")) 
+
+# b. Extract those customers whose 'InternetService' is either 'DSL' or 'Fiber optic' & store the result in 'Internet_dsl_fiber
+Internet_dsl_fiber <- subset(customer_churn, InternetService=="DSL" | InternetService=="Fiber optic") 
+head(Internet_dsl_fiber) 
+```
+
+### Module 1 : Case Study 3 - In-Built Functions
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+
+# 1. Do these operations with the head() function:
+# a. Get the first 4 records from 'PhoneService' column
+head(customer_churn$PhoneService,4)  
+
+# b. Get the first 8 records from 'Contract' column
+head(customer_churn$Contract,8)
+
+
+# 2. Do these operations with the tail() function:
+
+# a. Get the last record of 'TotalCharges' column
+tail(customer_churn$TotalCharges,1)
+  
+# b. Get the last 5 records of 'tenure' column
+tail(customer_churn$tenure,5)
+
+# 3. Find the average, minimum, maximum & range from the 'tenure' column
+summary(customer_churn$tenure)
+range(customer_churn$tenure)
+# OR
+mean(customer_churn$tenure)
+min(customer_churn$tenure)
+max(customer_churn$tenure)
+
+# 4. Get 10 random values from the 'TotalCharges' column using sample()
+sample(customer_churn$TotalCharges, size=10)
+
+# 5. Find the count of different levels in 'PaymentMethod' & 'Contract' columns using table() 
+table(customer_churn$PaymentMethod)
+table(customer_churn$Contract)
+```
+
+### Module 1 : Case Study 4 - Data Structures
+
+```{r}
+# Loading the data-set
+customer_churn <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+# 1. Create these vectors:
+
+# a. A character vector named 'fruits' with these values: 'Apple', 'Guava', 'Banana', 'Mango'
+fruits <- c("Apple", "Guava", "Banana", "Mango")
+fruits
+
+# b. A numeric vector named 'hundred' comprising of the first 100 natural numbers
+hundred <- c(seq(1, by=1, 100))
+hundred
+
+# c. A logical vector named 'logic_game' with these values: 'TRUE','TRUE','FALSE','FALSE'
+logic_game <- c(T,T,F,F)
+logic_game
+
+# 2. Create a list named 'jumbo' which comprises of:
+
+# a. A character vector comprising of alphabets from A to D
+item_1 <- (toupper(letters[1 :4]))
+item_1
+  
+# b. A numeric vector comprising of numbers from 55 to 60
+item_2 <- c(seq(55,by=1,60))
+item_2
+  
+# c. A logical vector comprising of just these two values: True, False
+item_3 <- c(T,F)
+item_3  
+
+# List named 'jumbo' which comprises of above vectors
+jumbo <- list(item_1,item_2,item_3) 
+jumbo
+
+# i. Now, access the third value from the first element of the list
+jumbo[[1]][[3]]  
+
+# ii. Access the 2nd value from the 2nd element of the list
+jumbo[[2]][[2]]
+
+# iii. Access the 1st value from the 3rd element of the list
+jumbo[[3]][[1]]
+
+
+# 3. Create a matrix named 'four_trouble', with the numbers 1 to 16.  The matrix should have 4 rows & 4 columns
+four_trouble <- matrix(data=seq(1,by=1,16), nrow=4, ncol=4)  
+four_trouble  
+
+# a. Arrange the elements by row
+four_trouble <- matrix(data=seq(1,by=1,16), nrow=4, ncol=4, byrow = TRUE)
+four_trouble
+
+# 4. Create an array named 'sky_maze' with the numbers 1 to 32.  The array should comprise of two 4*4 matrices 
+sky_maze <- array(data=seq(1,by=1,32), dim=c(4,4,2))
+sky_maze 
+```
+
+### Module 1 : Case Study 5 - Flow Control
+
+```{r}
+# Loading the data-set
+churn1 <- read.csv('/home/carb0n/Desktop/r/d/customer_churn.csv')
+
+
+# 1. Check if the value in the 6th cell of 'PaymentMethod' column is 'Electronic check'. If yes, print "Yes, the payment method is Electronic check"
+if(churn1$PaymentMethod[6]=="Electronic check"){
+  print("Yes, the payment method is Electronic check")
+}
+
+# 2. Check the value present in 12th cell of 'Contract' column.
+# If it's 'month-to-month', print 'The contract is on a month to month basis'
+# If it's 'One year', print 'The contract is on a yearly basis'
+# If it's 'Two year', print 'The contract is on a two-year basis'
+if(churn1$Contract[12]=="Month-to-month"){
+  print("The contract is on a month to month basis")
+}else if(churn1$Contract[12]=="One year"){
+  print("The contract is on a yearly basis")
+}else if(churn1$Contract[12]=="Two year"){
+  print("The contract is on a two-year basis")
+}
+
+# 3. Use switch to check the gender in 6th cell of 'gender' column.
+# If it's 'Male', give a discount of 20% in 'MonthlyCharges'
+# If it's 'Female', give a discount of 50% in 'MonthlyCharges'
+switch(as.character(churn1$gender[6]),
+       "Male"=churn1$MonthlyCharges[6]-(churn1$MonthlyCharges[6]*0.2),
+       "Female"=churn1$MonthlyCharges[6]-(churn1$MonthlyCharges[6]*0.5)) -> churn1$MonthlyCharges[6]
+churn1$MonthlyCharges[6]
+
+# 4. Use for loop to get the count of customers whose 'InternetService' is'DSL'
+count=0
+for(i in 1 :nrow(churn1)){
+  if(churn1$InternetService[i]=="DSL"){
+    count=count+1
+  }
+}
+count
+
+# 5. Use while to find the number of customers whose tenure is exactly '2' months
+count=0
+i=1
+while(i<=nrow(churn1)){
+  if(churn1$tenure[i]==2){
+    count=count+1
+  }
+  i=i+1
+}
+count
+```
